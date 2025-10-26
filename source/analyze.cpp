@@ -86,10 +86,10 @@ std::vector<cbp::tree::node> build_parsing_subtree(const std::vector<cbp::trace:
             ++depth;
 
             result.push_back({
-                .name  = normalize_path(event.args.at("detail").as<std::string>()), //
-                .time  = event.time,                                                //
-                .depth = depth,                                                     //
-                .type  = cbp::tree::node_type::source_parsing                       //
+                .name  = event.args.at("detail").get_string(), //
+                .time  = event.time,                           //
+                .depth = depth,                                //
+                .type  = cbp::tree::node_type::source_parsing  //
             });
         }
         // Include ended
@@ -120,10 +120,86 @@ std::vector<cbp::tree::node> build_parsing_subtree(const std::vector<cbp::trace:
     return result;
 }
 
+// Nodes:
+//    > root      | node.depth = 0
+//    >    child1 | node.depth = 1
+//    >    child2 | node.depth = 1
+
 std::vector<cbp::tree::node>
 build_instantiation_subtree([[maybe_unused]] const std::vector<cbp::trace::event>& instantiation_events,
                             [[maybe_unused]] const std::vector<cbp::tree::node>&   parsing_subtree) {
-    return std::vector<cbp::tree::node>{}; // TEMP:
+    // Create root node
+    constexpr std::size_t root_depth = 1;
+
+    std::vector<cbp::tree::node> result = parsing_subtree;
+
+    result.front() = cbp::tree::node{
+        .name           = "Template instantiation",           //
+        .time           = instantiation_events.front().time,  //
+        .duration_total = cbp::milliseconds{},                //
+        .duration_self  = cbp::milliseconds{},                //
+        .depth          = root_depth,                         //
+        .type           = cbp::tree::node_type::instantiation //
+    };
+
+    // Create filename mapping & clear the timings
+    std::unordered_map<std::string, std::size_t> source_mapping;
+
+    for (std::size_t i = 0; i < result.size(); ++i) {
+        auto& node = result[i];
+
+        if (node.type != cbp::tree::node_type::source_parsing) continue;
+
+        node.time           = cbp::milliseconds{};
+        node.duration_total = cbp::milliseconds{};
+        node.duration_self  = cbp::milliseconds{};
+        node.type           = cbp::tree::node_type::source_instantiation;
+
+        source_mapping[node.name] = i;
+    }
+
+    // Accumulate timings into the tree using the mapping
+    for (const auto& event : instantiation_events) {
+        const std::string name = event.args.at("file").get_string();
+
+        if (!event.duration) throw cbp::exception{"Template instantiation event is missing a duration field."};
+        // should never trigger assuming a correct schema
+
+        // Instantiation happened in one of the includes
+        if (auto it = source_mapping.find(name); it != source_mapping.end()) {
+            const std::size_t i = it->second;
+
+            result[i].duration_self += event.duration.value();
+            result[i].duration_total += event.duration.value();
+        }
+        // Instantiation happened in the '.cpp'
+        else {
+            result.front().duration_self += event.duration.value();
+            result.front().duration_total += event.duration.value();
+        }
+    }
+
+    // Propagate self-duration upwards to get total duration for each node
+    std::size_t max_depth = 0;
+    for (const auto& node : result) max_depth = std::max(max_depth, node.depth);
+
+    for (std::size_t depth = max_depth; depth > 0; --depth) {
+
+        cbp::microseconds child_nodes_duration_total{};
+
+        for (std::size_t i = result.size() - 1; i != std::size_t(-1); --i) {
+            auto& node = result[i];
+
+            if (node.depth == depth) child_nodes_duration_total += node.duration_total;
+
+            if (node.depth == depth - 1) {
+                node.duration_total += child_nodes_duration_total;
+                child_nodes_duration_total = cbp::microseconds{};
+            }
+        }
+    } // TEMP: This is a mess, but performant, complexity O(nodes * max_depth)
+
+    return result;
 }
 
 

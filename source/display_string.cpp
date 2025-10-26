@@ -33,7 +33,7 @@ private:
         std::string color_name;
 
         for (const auto& category : this->config.tree.categorize) {
-            if (node.duration_total > category.duration) {
+            if (node.duration_total >= category.duration) {
                 color_name = category.color;
                 break;
             }
