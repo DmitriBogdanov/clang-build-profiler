@@ -17,6 +17,7 @@ add_executable(
     "source/demangle.cpp"
     "source/display_string.cpp"
     "source/prettify.cpp"
+    "source/tree.cpp"
     "source/version.cpp"
 )
 

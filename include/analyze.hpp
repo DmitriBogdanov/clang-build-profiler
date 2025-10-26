@@ -16,9 +16,9 @@
 
 
 namespace cbp {
-
-tree::targets_node          analyze_build(std::string_view path);
-tree::target_node           analyze_target(std::string_view path);
-tree::translation_unit_node analyze_translation_unit(std::string_view path);
+ 
+cbp::tree analyze_build(std::string_view path);
+cbp::tree analyze_target(std::string_view path);
+cbp::tree analyze_translation_unit(std::string_view path);
 
 } // namespace cbp

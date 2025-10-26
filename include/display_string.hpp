@@ -16,6 +16,6 @@
 
 namespace cbp::display::string {
 
-[[nodiscard]] std::string serialize(const profile& results, const cbp::config& config, bool colors = true);
+[[nodiscard]] std::string serialize(const profile& profile, bool colors = true);
 
 }

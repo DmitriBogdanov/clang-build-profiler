@@ -13,6 +13,7 @@
 
 #include "analyze.hpp"
 #include "config.hpp"
+#include "display_string.hpp"
 #include "exception.hpp"
 #include "version.hpp"
 
@@ -66,11 +67,11 @@ int main(int argc, char* argv[]) try {
             exit_success("Serialized a copy of default config to {{ {} }} ", path);
         });
 
-    cli                                                //
-        .add_argument("-c", "--config")                //
+    cli                                           //
+        .add_argument("-c", "--config")           //
         .default_value(cbp::config::default_path) //
-        .required()                                    //
-        .help("Specifies custom config path");         //
+        .required()                               //
+        .help("Specifies custom config path");    //
 
     auto& artifact_group = cli.add_mutually_exclusive_group();
 
@@ -94,29 +95,35 @@ int main(int argc, char* argv[]) try {
     }
 
     // Parse config
-    const std::string      config_path = cli.get<std::string>("--config");
-    const cbp::config config      = cbp::config::from_file(config_path);
+    const std::string config_path = cli.get<std::string>("--config");
 
+    const cbp::config config =
+        std::filesystem::exists(config_path) ? cbp::config::from_file(config_path) : cbp::config{};
+    
+    if (const auto err = config.validate()) exit_failure("Config validation error:\n{}", err.value());
+        
     // Handle specific translation unit
     if (cli.is_used("--file")) {
         const std::string path = cli.get<std::string>("--file");
-        
+
         std::println("Analyzing translation unit {{ {} }}...", path);
 
-        const cbp::tree::translation_unit_node node = cbp::analyze_translation_unit(path);
-        
-        // TODO: Print the 'node'
-        
+        cbp::profile profile;
+        profile.tree   = cbp::analyze_translation_unit(path);
+        profile.config = config;
+
+        std::println("{}", cbp::display::string::serialize(profile, true));
+
         exit_success("Finished.");
     }
     // Handle artifact directory
     else if (cli.is_used("--directory")) {
         const std::string path = cli.get<std::string>("--directory");
-        
+
         std::println("Analyzing build directory {{ {} }}...", path);
-        
+
         // TODO:
-        
+
         exit_failure("Not implemented yet.");
     }
     // Handle CMake build
@@ -124,9 +131,9 @@ int main(int argc, char* argv[]) try {
         const std::string path = cli.get<std::string>("--build");
 
         std::println("Analyzing CMake build {{ {} }}...", path);
-        
+
         // TODO:
-        
+
         exit_failure("Not implemented yet.");
     }
 } catch (cbp::exception& e) {

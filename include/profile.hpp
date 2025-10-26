@@ -6,7 +6,7 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// A struct trepresenting a total of all profiling results.
+// A struct representing a total of all profiling results.
 // _________________________________________________________________________________
 
 #pragma once
@@ -18,8 +18,8 @@
 namespace cbp {
 
 struct profile {
-    tree::tree tree;
-    config     config;
+    tree   tree;
+    config config;
 
     // TODO: summary
 };

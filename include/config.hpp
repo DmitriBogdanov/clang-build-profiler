@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -26,8 +27,8 @@ struct config {
     // ------------------
 
     struct category {
-        milliseconds duration;
-        std::string  color;
+        milliseconds duration = {};
+        std::string  color    = {};
     };
 
     struct prefix_replacement {
@@ -36,8 +37,15 @@ struct config {
     };
 
     struct tree_section {
-        bool                            enabled        = true;
-        std::vector<category>           categorize     = {};
+        bool enabled = true;
+
+        std::vector<category> categorize = {
+            category{.duration = milliseconds{300}, .color = "red"   },
+            category{.duration = milliseconds{150}, .color = "yellow"},
+            category{.duration = milliseconds{50},  .color = "white" },
+            category{.duration = milliseconds{0},   .color = "gray"  }
+        };
+
         std::vector<prefix_replacement> replace_prefix = {};
     };
 
@@ -58,6 +66,8 @@ struct config {
 
     std::string to_string() const;
     void        to_file(std::string_view path) const;
+
+    std::optional<std::string> validate() const;
 };
 
 } // namespace cbp

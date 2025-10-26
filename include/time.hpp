@@ -30,7 +30,7 @@ template <class Rep, class Period>
 std::uint64_t to_percentage(std::chrono::duration<Rep, Period> duration, std::chrono::duration<Rep, Period> timeframe) {
     using ms              = std::chrono::duration<double, milliseconds::period>;
     const double fraction = ms(duration).count() / ms(timeframe).count();
-    return static_cast<std::uint64_t>(fraction * 1e2);
+    return static_cast<std::uint64_t>(fraction * 100);
 }
 
 } // namespace cbp::time
