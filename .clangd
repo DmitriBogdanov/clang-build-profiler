@@ -1,0 +1,5 @@
+CompileFlags:
+  Add: [-std=c++23, -stdlib=libc++, -ferror-limit=0]
+  
+Diagnostics:
+  UnusedIncludes: None

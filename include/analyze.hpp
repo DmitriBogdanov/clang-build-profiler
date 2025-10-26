@@ -1,0 +1,24 @@
+// ____________________________________ LICENSE ____________________________________
+//
+// Source repo: https://github.com/DmitriBogdanov/clang-build-profiler
+//
+// This project is licensed under the MIT License.
+//
+// ____________________________________ CONTENT ____________________________________
+//
+// Functions for analyzing builds/directories/files, which turn clang traces
+// into some kind of in-memory structure that we can work with.
+// _________________________________________________________________________________
+
+#pragma once
+
+#include "tree.hpp"
+
+
+namespace cbp {
+
+tree::targets_node          analyze_build(std::string_view path);
+tree::target_node           analyze_target(std::string_view path);
+tree::translation_unit_node analyze_translation_unit(std::string_view path);
+
+} // namespace cbp

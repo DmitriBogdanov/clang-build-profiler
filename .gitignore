@@ -1,0 +1,39 @@
+# Ignore everything
+*
+
+# Toolchain
+# > Git
+!.gitignore
+!.gitattributes
+# > CI
+!.github/
+!.github/**
+# > LLVM
+!.clang-format
+!.clang-tidy
+!.clangd
+# > Static analysis
+!.cppcheck
+
+# Build
+# > CMake
+!CMakePresets.json
+!CMakeLists.txt
+# > Scripts
+!bash/
+!bash/**
+!actions.sh
+
+# Docs
+# > Config
+!mkdocs.yml
+# > Content
+!docs/
+!docs/**
+
+# Code
+# > Executable
+!include/
+!include/**
+!source/
+!source/**

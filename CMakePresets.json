@@ -1,0 +1,56 @@
+{
+    "version": 3,
+    
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    
+    "configurePresets": [
+        {
+            "name": "base",
+            "description": "Common configuration variables.",
+            "hidden": true,
+            "binaryDir": "build/",
+            "cacheVariables": {
+                "CR_COMPILE_FEATURES": "cxx_std_23"
+            }
+        },
+        {
+            "name": "clang",
+            "description": "Clang configuration variables.",
+            "inherits": [ "base" ],
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CR_COMPILER_FLAGS": "-stdlib=libc++;-O0;-g3;-Wall;-Wextra;-Wpedantic;-Wno-unused-parameter;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;-ftime-trace;-ftime-trace-verbose",
+                "CR_LINKER_FLAGS": "-stdlib=libc++;-fsanitize=address,undefined"
+            }
+        }
+    ],
+    
+    "buildPresets": [
+        {
+            "name": "base",
+            "description": "Common build variables.",
+            "hidden": true,
+            "jobs": 4
+        },
+        { "name": "clang", "configurePreset": "clang", "inherits": [ "base" ] }
+    ],
+    
+    "testPresets": [
+        {
+            "name": "base",
+            "description": "CTest arguments",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "timeout": 60
+            }
+        },
+        { "name": "clang", "configurePreset": "clang", "inherits": [ "base" ] }
+    ]
+}
