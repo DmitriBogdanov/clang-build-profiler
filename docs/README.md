@@ -10,7 +10,7 @@ Ubuntu: passing
 MacOS: passing
 FreeBSD: passing
 
-# clang-build-report
+# clang-build-profiler
 
 > [!Warning]
 > This project is under development, current documentations acts more like a specification than an accurate representation of existing features.
