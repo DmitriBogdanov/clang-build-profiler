@@ -36,6 +36,26 @@ std::vector<cbp::trace::event> extract_instantiation_events(std::vector<cbp::tra
     });
 }
 
+template <class Predicate>
+std::optional<cbp::trace::event> extract_event(std::vector<cbp::trace::event>& events, Predicate&& predicate) {
+    auto it = std::find_if(events.begin(), events.end(), predicate);
+
+    if (it == events.end()) return std::nullopt;
+
+    auto result = std::move(*it);
+    events.erase(it);
+
+    return result;
+}
+
+cbp::trace::event extract_event_by_name(std::vector<cbp::trace::event>& events, std::string_view name) {
+    auto result = extract_event(events, [&](const cbp::trace::event& event){ return event.name == name; });
+    
+    if (!result) throw cbp::exception{"Could not extact event with the name {{ {} }} from trace", name};
+    
+    return result.value();
+}
+
 [[nodiscard]] std::string normalize_path(std::filesystem::path path) {
     return path.lexically_normal().string();
     // Note: Normalizing paths leads to a nicer output, otherwise we can end
@@ -51,155 +71,123 @@ std::vector<cbp::trace::event> extract_instantiation_events(std::vector<cbp::tra
 // transitive includes based on the "b" / "e" event nesting. Below is a simple example:
 //
 // Events:
-//    > root-b      | depth = 0->1 // every event corresponds to a loop iteration
-//    >    child1-b | depth = 1->2
-//    >    child1-e | depth = 2->1
-//    >    child2-b | depth = 1->2
-//    >    child2-e | depth = 2->1
-//    > root-e      | depth = 1->0 // to find & finish the 'root' node here we need to search
-//                                 // upwards for the last node with 'depth == 1'
+//    > root-b      | call 'handle_parsing_event(events, root,   1)'
+//    >    child1-b | call 'handle_parsing_event(events, child1, 2)'
+//    >    child1-e | end  'handle_parsing_event(events, child1, 2)'
+//    >    child2-b | call 'handle_parsing_event(events, child2, 4)'
+//    >    child2-e | end  'handle_parsing_event(events, child2, 4)'
+//    > root-e      | end  'handle_parsing_event(events, root,   1)'
 //
-// Nodes:
-//    > root      | node.depth = 0
-//    >    child1 | node.depth = 1
-//    >    child2 | node.depth = 1
+// Resulting tree:
+//    > root
+//    >    child1
+//    >    child2
 
-std::vector<cbp::tree::node> build_parsing_subtree(const std::vector<cbp::trace::event>& parsing_events) {
+// Events:
+//    > root-b      | parent: parsing | cursor: 0 | creates 'root'
+//    >    child1-b | parent: root    | cursor: 1 | creates 'child1'
+//    >    child1-e | parent: child1  | cursor: 2 | ends    'child1'
+//    >    child2-b | parent: root    | cursor: 3 | creates 'child2'
+//    >    child2-e | parent: child2  | cursor: 4 | ends    'child2'
+//    > root-e      | parent: root    | cursor: 5 | ends    'root'
 
-    constexpr std::size_t root_depth = 1;
+// Events:
+//    > root-b    | parent: parsing
+//      > child-b | parent: root
+//      > child-e | parent: child
+//    > root-e    | parent: root
 
-    auto parsing_node = cbp::tree::node{
-        .name           = "Parsing",                                                //
-        .time           = parsing_events.front().time,                              //
-        .duration_total = parsing_events.back().time - parsing_events.front().time, //
-        .duration_self  = cbp::milliseconds{},                                      // how do we compute this?
-        .depth          = root_depth,                                               //
-        .type           = cbp::tree::node_type::parsing                             //
+using event_span = std::span<const cbp::trace::event>;
+
+void handle_parsing_event(event_span parsing_events, cbp::tree& parent, std::size_t& cursor) {
+    // Include begin
+    const auto& begin_event = parsing_events[cursor++];
+
+    if (begin_event.type != "b") throw cbp::exception{"Incorrect trace schema, event type mismatch at pos {}", cursor};
+
+    auto current = cbp::tree{
+        .type  = cbp::tree_type::source_parsing,             //
+        .name  = begin_event.args.at("detail").get_string(), //
+        .total = -begin_event.time                           //
     };
 
-    auto        result = std::vector{std::move(parsing_node)};
-    std::size_t depth  = root_depth;
+    // Handle transitive includes
+    while (parsing_events[cursor].type == "b") handle_parsing_event(parsing_events, current, cursor);
 
-    for (const auto& event : parsing_events) {
-        // Include began
-        if (event.type == "b") {
-            ++depth;
+    // Include end
+    const auto& end_event = parsing_events[cursor++];
 
-            result.push_back({
-                .name  = event.args.at("detail").get_string(), //
-                .time  = event.time,                           //
-                .depth = depth,                                //
-                .type  = cbp::tree::node_type::source_parsing  //
-            });
-        }
-        // Include ended
-        else if (event.type == "e") {
-            // Iterate upwards until we find a node with the same depth, this achieves 2 things simultaneously:
-            //    1) Finds the node corresponding to this end event
-            //    2) Computes a total duration of all its child nodes
-            cbp::microseconds child_nodes_duration_total{};
+    if (end_event.type != "e") throw cbp::exception{"Incorrect trace schema, event type mismatch at pos {}", cursor};
 
-            for (auto it = result.rbegin(); it != result.rend(); ++it) {
-                if (it->depth == depth + 1) child_nodes_duration_total += it->duration_total;
+    // Gather total & self duration
+    current.total += end_event.time;
 
-                if (it->depth == depth) { // corresponding node is found
-                    it->duration_total = event.time - it->time;
-                    it->duration_self  = it->duration_total - child_nodes_duration_total;
-                    break;
-                }
-            }
+    current.self = current.total;
+    for (const auto& child : current.children) current.self -= child.total;
 
-            --depth;
-        }
-        // Wrong event type, should never trigger assuming a correct schema
-        else {
-            throw cbp::exception{"Encountered an unknown parsing event type {{ {} }}.", event.type};
-        }
-    }
+    // Finalize
+    std::sort(current.children.begin(), current.children.end());
 
-    return result;
+    parent.children.push_back(std::move(current));
 }
 
-// Nodes:
-//    > root      | node.depth = 0
-//    >    child1 | node.depth = 1
-//    >    child2 | node.depth = 1
+cbp::tree build_parsing_subtree(event_span parsing_events) {
+    // Root node
+    auto parsing_tree = cbp::tree{.type = cbp::tree_type::parsing, .name = "Parsing"};
 
-std::vector<cbp::tree::node>
-build_instantiation_subtree([[maybe_unused]] const std::vector<cbp::trace::event>& instantiation_events,
-                            [[maybe_unused]] const std::vector<cbp::tree::node>&   parsing_subtree) {
-    // Create root node
-    constexpr std::size_t root_depth = 1;
+    // Create child nodes from events
+    for (std::size_t cursor = 0; cursor < parsing_events.size();)
+        handle_parsing_event(parsing_events, parsing_tree, cursor);
 
-    std::vector<cbp::tree::node> result = parsing_subtree;
+    std::sort(parsing_tree.children.begin(), parsing_tree.children.end());
 
-    result.front() = cbp::tree::node{
-        .name           = "Template instantiation",           //
-        .time           = instantiation_events.front().time,  //
-        .duration_total = cbp::milliseconds{},                //
-        .duration_self  = cbp::milliseconds{},                //
-        .depth          = root_depth,                         //
-        .type           = cbp::tree::node_type::instantiation //
-    };
+    // Gather total duration for the root node
+    for (const auto& child : parsing_tree.children) parsing_tree.total += child.total;
+    // TODO: How do we get a self-parsing time?
 
-    // Create filename mapping & clear the timings
-    std::unordered_map<std::string, std::size_t> source_mapping;
+    return parsing_tree;
+}
 
-    for (std::size_t i = 0; i < result.size(); ++i) {
-        auto& node = result[i];
+cbp::microseconds collect_total_from_children(cbp::tree& tree) {
+    tree.total = tree.self;
 
-        if (node.type != cbp::tree::node_type::source_parsing) continue;
+    for (auto& child : tree.children) tree.total += collect_total_from_children(child);
 
-        node.time           = cbp::milliseconds{};
-        node.duration_total = cbp::milliseconds{};
-        node.duration_self  = cbp::milliseconds{};
-        node.type           = cbp::tree::node_type::source_instantiation;
+    std::sort(tree.children.begin(), tree.children.end());
 
-        source_mapping[node.name] = i;
-    }
+    return tree.total;
+}
 
-    // Accumulate timings into the tree using the mapping
+cbp::tree build_instantiation_subtree(event_span instantiation_events, const cbp::tree& parsing_subtree) {
+    // Root node
+    auto instantiation_tree = cbp::tree{.type = cbp::tree_type::instantiation, .name = "Template instantiation"};
+
+    // Clone the include structure from parsing
+    instantiation_tree.children = parsing_subtree.children;
+    instantiation_tree.for_all_children([](cbp::tree& child) {
+        child.type  = cbp::tree_type::source_instantiation;
+        child.total = cbp::microseconds{};
+        child.self  = cbp::microseconds{};
+    });
+
+    // Create name mapping
+    std::unordered_map<std::string, cbp::tree*> source_mapping;
+    instantiation_tree.for_all_children([&](cbp::tree& child) { source_mapping[child.name] = std::addressof(child); });
+
+    // Create child nodes from events
     for (const auto& event : instantiation_events) {
         const std::string name = event.args.at("file").get_string();
 
-        if (!event.duration) throw cbp::exception{"Template instantiation event is missing a duration field."};
-        // should never trigger assuming a correct schema
-
         // Instantiation happened in one of the includes
-        if (auto it = source_mapping.find(name); it != source_mapping.end()) {
-            const std::size_t i = it->second;
-
-            result[i].duration_self += event.duration.value();
-            result[i].duration_total += event.duration.value();
-        }
+        if (auto it = source_mapping.find(name); it != source_mapping.end()) it->second->self += event.duration.value();
         // Instantiation happened in the '.cpp'
-        else {
-            result.front().duration_self += event.duration.value();
-            result.front().duration_total += event.duration.value();
-        }
+        else instantiation_tree.self += event.duration.value();
     }
 
-    // Propagate self-duration upwards to get total duration for each node
-    std::size_t max_depth = 0;
-    for (const auto& node : result) max_depth = std::max(max_depth, node.depth);
+    // Gather total durations and order the nodes
+    collect_total_from_children(instantiation_tree);
 
-    for (std::size_t depth = max_depth; depth > 0; --depth) {
-
-        cbp::microseconds child_nodes_duration_total{};
-
-        for (std::size_t i = result.size() - 1; i != std::size_t(-1); --i) {
-            auto& node = result[i];
-
-            if (node.depth == depth) child_nodes_duration_total += node.duration_total;
-
-            if (node.depth == depth - 1) {
-                node.duration_total += child_nodes_duration_total;
-                child_nodes_duration_total = cbp::microseconds{};
-            }
-        }
-    } // TEMP: This is a mess, but performant, complexity O(nodes * max_depth)
-
-    return result;
+    return instantiation_tree;
 }
 
 
@@ -210,23 +198,17 @@ cbp::tree cbp::analyze_translation_unit(std::string_view path) {
     // Read the trace & order events chronologically
     auto trace = cbp::read_file_json<cbp::trace>(path);
 
-    std::stable_sort(trace.events.begin(), trace.events.end(),
-                     [](const cbp::trace::event& a, const cbp::trace::event& b) { return a.time < b.time; });
-
     if (trace.events.empty()) throw cbp::exception{"Trace parsed from {{ {} }} contains no events", path};
     // this should never trigger for a correct trace
 
-    // Create root node
-    auto translation_unit_node = cbp::tree::node{
-        .name           = normalize_path(path),                                 //
-        .time           = trace.events.front().time,                            //
-        .duration_total = trace.events.back().time - trace.events.front().time, //
-        .duration_self  = cbp::microseconds{},                                  //
-        .depth          = 0,                                                    //
-        .type           = cbp::tree::node_type::translation_unit                //
-    };
+    std::stable_sort(trace.events.begin(), trace.events.end());
 
-    auto nodes = std::vector{std::move(translation_unit_node)};
+    // Create root node
+    auto translation_unit_tree = cbp::tree{
+        .type  = cbp::tree_type::translation_unit,                    //
+        .name  = normalize_path(path),                                //
+        .total = trace.events.back().time - trace.events.front().time //
+    };
 
     // Build the "Parsing" subtree
     auto parsing_events  = extract_parsing_events(trace.events);
@@ -236,11 +218,15 @@ cbp::tree cbp::analyze_translation_unit(std::string_view path) {
     auto instantiation_events  = extract_instantiation_events(trace.events);
     auto instantiation_subtree = build_instantiation_subtree(instantiation_events, parsing_subtree);
 
-    // Build the resulting translation unit subtree
-    nodes.insert(nodes.end(), std::make_move_iterator(parsing_subtree.begin()),
-                 std::make_move_iterator(parsing_subtree.end()));
-    nodes.insert(nodes.end(), std::make_move_iterator(instantiation_subtree.begin()),
-                 std::make_move_iterator(instantiation_subtree.end()));
+    // Add them to the translation unit tree
+    translation_unit_tree.children.push_back(std::move(parsing_subtree));
+    translation_unit_tree.children.push_back(std::move(instantiation_subtree));
 
-    return cbp::tree{.nodes = std::move(nodes)};
+    // Prettify names
+    translation_unit_tree.for_all_children([](cbp::tree& child) {
+        if (child.type == cbp::tree_type::source_parsing || child.type == cbp::tree_type::source_instantiation)
+            child.name = normalize_path(std::move(child.name));
+    });
+
+    return translation_unit_tree;
 }

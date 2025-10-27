@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include "json.hpp"
 #include "time.hpp"
 
 
@@ -43,35 +44,63 @@
 //    |   > child_1 (depth = 1)   |     > child_1 (depth = 2) <- [!] |     > child_1 (depth = 2)        |
 //    |   > child_2 (depth = 1)   |     > child_2 (depth = 2)        |     > child_2 (depth = 2)        |
 
+// TODO: Update the comment
+
 namespace cbp {
 
+enum class tree_type {
+    targets,
+    target,
+    translation_unit,
+    parsing,
+    source_parsing,
+    instantiation,
+    source_instantiation
+};
+
 struct tree {
+    tree_type         type;
+    std::string       name{};
+    microseconds      total{};
+    microseconds      self{};
+    std::vector<tree> children{};
 
-    enum class node_type {
-        targets,
-        target,
-        translation_unit,
-        parsing,
-        source_parsing,
-        instantiation,
-        source_instantiation
-    };
+    auto operator<=>(const tree& other) const {
+        return other.total <=> this->total;
+        // makes tree nodes orderable by total duration, note the reversed order of arguments,
+        // which means nodes with greater total duration will compare "less" and appear at the front
+    }
 
-    struct node {
-        std::string  name{};
-        microseconds time{};
-        microseconds duration_total{};
-        microseconds duration_self{};
-        std::size_t  depth{};
-        node_type    type;
-    };
+    template <std::invocable<const tree&> Func>
+    void for_all(Func func) const {
+        func(*this);
+        for (const auto& child : this->children) child.for_all(func);
+    }
 
-    std::vector<node> nodes;
+    template <std::invocable<tree&> Func>
+    void for_all(Func func) {
+        func(*this);
+        for (auto& child : this->children) child.for_all(func);
+    }
 
-    node&       root();
-    const node& root() const;
+    template <std::invocable<const tree&> Func>
+    void for_all_children(Func func) const {
+        for (const auto& child : this->children) child.for_all(func);
+    }
 
-    void validate_invariants() const;
+    template <std::invocable<tree&> Func>
+    void for_all_children(Func func) {
+        for (auto& child : this->children) child.for_all(func);
+    }
 };
 
 } // namespace cbp
+
+// Define enum reflection for JSON serialization
+template <>
+struct glz::meta<cbp::tree_type> {
+    using enum cbp::tree_type;
+
+    static constexpr auto value =
+        glz::enumerate(targets, target, translation_unit, parsing, source_parsing, instantiation, source_instantiation);
+};

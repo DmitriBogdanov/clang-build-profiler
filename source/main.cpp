@@ -16,6 +16,7 @@
 #include "display_string.hpp"
 #include "exception.hpp"
 #include "version.hpp"
+#include "json.hpp" // TEMP:
 
 
 template <class... Args>
@@ -113,6 +114,8 @@ int main(int argc, char* argv[]) try {
         profile.config = config;
 
         std::println("{}", cbp::display::string::serialize(profile, true));
+        
+        cbp::write_file_json("tree.json", profile.tree);
 
         exit_success("Finished.");
     }

@@ -35,6 +35,10 @@ struct trace {
         microseconds                time{};     // stored in us
         std::optional<microseconds> duration{}; // stored in us
         glz::generic                args{};     // schema varies based on event name and compiler flags
+
+        auto operator<=>(const event& other) const {
+            return this->time <=> other.time; // makes events orderable by time
+        }
     };
 
     std::vector<event> events{};
