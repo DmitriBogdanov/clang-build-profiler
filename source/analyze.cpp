@@ -4,6 +4,7 @@
 #include <stack>
 
 #include "exception.hpp"
+#include "prettify.hpp"
 #include "profile.hpp"
 #include "trace.hpp"
 
@@ -63,8 +64,8 @@ cbp::trace::event extract_event_by_name(std::vector<cbp::trace::event>& events, 
 }
 
 
-// --- Subtrees ---
-// ----------------
+// --- Parsing subtree ---
+// -----------------------
 
 // Assuming a correct trace schema, every '#include' has a pair of correspondig begin/end events
 // (event types "b" and "e"). When these events are ordered chronologically, we can deduce
@@ -100,21 +101,23 @@ cbp::trace::event extract_event_by_name(std::vector<cbp::trace::event>& events, 
 using event_span = std::span<const cbp::trace::event>;
 
 void handle_parsing_event(event_span parsing_events, cbp::tree& parent, std::size_t& cursor) {
-    // Include begin
+    // Include began
     const auto& begin_event = parsing_events[cursor++];
 
     if (begin_event.type != "b") throw cbp::exception{"Incorrect trace schema, event type mismatch at pos {}", cursor};
 
     auto current = cbp::tree{
-        .type  = cbp::tree_type::source_parsing,             //
+        .type  = cbp::tree_type::parse,                      //
         .name  = begin_event.args.at("detail").get_string(), //
         .total = -begin_event.time                           //
     };
 
     // Handle transitive includes
+    if (cursor >= parsing_events.size()) throw cbp::exception{"Incorrect trace schema, source events end with begin."};
+
     while (parsing_events[cursor].type == "b") handle_parsing_event(parsing_events, current, cursor);
 
-    // Include end
+    // Include ended
     const auto& end_event = parsing_events[cursor++];
 
     if (end_event.type != "e") throw cbp::exception{"Incorrect trace schema, event type mismatch at pos {}", cursor};
@@ -143,50 +146,52 @@ cbp::tree build_parsing_subtree(event_span parsing_events) {
 
     // Gather total duration for the root node
     for (const auto& child : parsing_tree.children) parsing_tree.total += child.total;
-    // TODO: How do we get a self-parsing time?
+    // TODO: How do we get a self-parsing time? Is that even possible?
 
     return parsing_tree;
 }
 
-cbp::microseconds collect_total_from_children(cbp::tree& tree) {
-    tree.total = tree.self;
+// --- Instantiation subtree ---
+// -----------------------------
 
-    for (auto& child : tree.children) tree.total += collect_total_from_children(child);
+void handle_instantiation_event(event_span instantiation_events, cbp::tree& parent, std::size_t& cursor) {
+    // Instantiation began
+    const auto& event = instantiation_events[cursor];
 
-    std::sort(tree.children.begin(), tree.children.end());
+    auto current = cbp::tree{
+        .type  = cbp::tree_type::instantiate,          //
+        .name  = event.args.at("detail").get_string(), //
+        .total = event.duration.value()                //
+    };
 
-    return tree.total;
+    const cbp::microseconds event_end_time = event.time + current.total;
+
+    // Handle nested instantiations
+    while (++cursor < instantiation_events.size() && instantiation_events[cursor].time < event_end_time)
+        handle_instantiation_event(instantiation_events, current, cursor);
+
+    // Instantiation ended, gather self-duration
+    current.self = current.total;
+    for (const auto& child : current.children) current.self -= child.total;
+
+    // Finalize
+    std::sort(current.children.begin(), current.children.end());
+
+    parent.children.push_back(std::move(current));
 }
 
-cbp::tree build_instantiation_subtree(event_span instantiation_events, const cbp::tree& parsing_subtree) {
+cbp::tree build_instantiation_subtree(event_span instantiation_events) {
     // Root node
     auto instantiation_tree = cbp::tree{.type = cbp::tree_type::instantiation, .name = "Template instantiation"};
 
-    // Clone the include structure from parsing
-    instantiation_tree.children = parsing_subtree.children;
-    instantiation_tree.for_all_children([](cbp::tree& child) {
-        child.type  = cbp::tree_type::source_instantiation;
-        child.total = cbp::microseconds{};
-        child.self  = cbp::microseconds{};
-    });
-
-    // Create name mapping
-    std::unordered_map<std::string, cbp::tree*> source_mapping;
-    instantiation_tree.for_all_children([&](cbp::tree& child) { source_mapping[child.name] = std::addressof(child); });
-
     // Create child nodes from events
-    for (const auto& event : instantiation_events) {
-        const std::string name = event.args.at("file").get_string();
+    for (std::size_t cursor = 0; cursor < instantiation_events.size();)
+        handle_instantiation_event(instantiation_events, instantiation_tree, cursor);
 
-        // Instantiation happened in one of the includes
-        if (auto it = source_mapping.find(name); it != source_mapping.end())
-            it->second->total += event.duration.value();
-        // Instantiation happened in the '.cpp'
-        else instantiation_tree.total += event.duration.value();
-    }
+    std::sort(instantiation_tree.children.begin(), instantiation_tree.children.end());
 
-    // Gather total durations and order the nodes
-    // collect_total_from_children(instantiation_tree);
+    // Gather total duration for the root node
+    for (const auto& child : instantiation_tree.children) instantiation_tree.total += child.total;
 
     return instantiation_tree;
 }
@@ -217,43 +222,42 @@ cbp::tree cbp::analyze_translation_unit(std::string_view path) {
 
     // Build "Template instantiation" subtree
     auto instantiation_events  = extract_instantiation_events(trace.events);
-    auto instantiation_subtree = build_instantiation_subtree(instantiation_events, parsing_subtree);
+    auto instantiation_subtree = build_instantiation_subtree(instantiation_events);
 
     // Build "LLVM IR generation" subtree
     extract_event_by_name(trace.events, "Frontend");
     auto llvm_codegen_event    = extract_event_by_name(trace.events, "Frontend");
     auto llvm_codegen_duration = llvm_codegen_event.duration.value();
     auto llvm_codegen_subtree  = cbp::tree{
-         .type  = cbp::tree_type::target, //
-         .name  = "LLVM IR generation",   //
-         .total = llvm_codegen_duration,  //
-         .self  = llvm_codegen_duration   //
+         .type  = cbp::tree_type::llvm_codegen, //
+         .name  = "LLVM IR generation",         //
+         .total = llvm_codegen_duration,        //
+         .self  = llvm_codegen_duration         //
     };
 
     // Note: There are 2 "Frontend" events, 1st contains parsing + instantiation total, 2nd contains LLVM IR
     //       codegen total, we already handled parsing + instantiation so we can throw the first one away
 
-
     // Build "Optimization" subtree
     auto optimization_event    = extract_event_by_name(trace.events, "Optimizer");
     auto optimization_duration = optimization_event.duration.value();
     auto optimization_subtree  = cbp::tree{
-         .type  = cbp::tree_type::target, //
-         .name  = "Optimization",         //
-         .total = optimization_duration,  //
-         .self  = optimization_duration   //
+         .type  = cbp::tree_type::optimization, //
+         .name  = "Optimization",               //
+         .total = optimization_duration,        //
+         .self  = optimization_duration         //
     };
 
     // Build "Machine code generation" subtree
     auto native_codegen_event    = extract_event_by_name(trace.events, "CodeGenPasses");
     auto native_codegen_duration = native_codegen_event.duration.value();
     auto native_codegen_subtree  = cbp::tree{
-         .type  = cbp::tree_type::target,    //
-         .name  = "Machine code generation", //
-         .total = native_codegen_duration,   //
-         .self  = native_codegen_duration    //
+         .type  = cbp::tree_type::native_codegen, //
+         .name  = "Machine code generation",      //
+         .total = native_codegen_duration,        //
+         .self  = native_codegen_duration         //
     };
-    
+
     // Add them to the translation unit tree
     translation_unit_tree.children.push_back(std::move(parsing_subtree));
     translation_unit_tree.children.push_back(std::move(instantiation_subtree));
@@ -263,8 +267,8 @@ cbp::tree cbp::analyze_translation_unit(std::string_view path) {
 
     // Prettify names
     translation_unit_tree.for_all_children([](cbp::tree& child) {
-        if (child.type == cbp::tree_type::source_parsing || child.type == cbp::tree_type::source_instantiation)
-            child.name = normalize_path(std::move(child.name));
+        if (child.type == cbp::tree_type::parse) child.name = normalize_path(std::move(child.name));
+        if (child.type == cbp::tree_type::instantiate) child.name = cbp::symbol::prettify(std::move(child.name));
     });
 
     return translation_unit_tree;

@@ -10,6 +10,8 @@
 #include <cassert>
 #include <regex>
 
+#include "external/UTL/profiler.hpp" // TEMP:
+
 
 void replace_all(std::string& str, std::string_view from, std::string_view to) {
     std::size_t i = 0;
@@ -19,6 +21,10 @@ void replace_all(std::string& str, std::string_view from, std::string_view to) {
         i += to.size();                                    // step over the replaced region
     }
 }
+
+// void replace_all(std::string& str, const std::regex& from, std::string_view to) {
+//     str = std::regex_replace(str, from, std::string(to));
+// }
 
 void replace_all(std::string& str, const std::regex& from, std::string_view to) {
     std::smatch match;
@@ -67,47 +73,52 @@ void replace_all_template(std::string& str, const std::regex& from, std::string_
 }
 
 // Prettifier implementation initially inspired by symbol cleanup from https://github.com/jeremy-rifkin/cpptrace
-// (licensed MIT), it was rewritten to fit a more modern style and its replacement rules were extended & simplified
-// to make regex a little faster since standard library is notoriously slow at evaluating complex regex.
+// (licensed MIT), it was rewritten to fit a more modern style, its replacement rules were significantly extended
+// and regex simplified to make things faster since standard library is notoriously slow at evaluating complex regex.
 
-std::string cbp::symbol::prettify(std::string symbol) {  
+std::string cbp::symbol::prettify(std::string symbol) {
+
     // Normalize angle brackets: "> >" -> ">>"
     replace_all_while_possible(symbol, "> >", ">>");
     
+    // Normalize pointer & reference spacing
+    replace_all(symbol, std::regex{R"(\s*\*)"}, "*");
+    replace_all(symbol, std::regex{R"(\s*&)"}, "&");
+
     // Normalize commas: "," or " ," -> ", "
     replace_all(symbol, std::regex{R"(\s*,\s*)"}, ", ");
-    
+
     // Normalize "class whatever" -> "whatever"
     replace_all(symbol, std::regex{R"(\b(class|struct)\s+)"}, "");
     // this normalizes MSVC relative to the other compilers
-    
+
     // Normalize "`anonymous namespace'" -> "(anonymous namespace)"
-    replace_all(symbol, std::regex{"`anonymous namespace'"}, "(anonymous namespace)");
+    replace_all(symbol, "`anonymous namespace'", "(anonymous namespace)");
     // this normalizes MSVC relative to the other compilers
 
     // Replace "std::_something::" -> "std::"
     replace_all(symbol, std::regex{R"(std(::_[a-zA-Z0-9_]+)?::)"}, "std::");
     // usually this removes stuff like "std::__1::", "std::__cxx11::" and etc.
-    
-    // TODO: Test and perhaps remove the rules for 'std::__something::'
-    
-    // Replace "std::__something::basic_string" -> "std::string"
-    replace_all_template(symbol, std::regex{R"(std(::[a-zA-Z0-9_]+)?::basic_string<char)"}, "std::string");
 
-    // Replace "std::__something::basic_string_view" -> "std::string_view"
-    replace_all_template(symbol, std::regex{R"(std(::[a-zA-Z0-9_]+)?::basic_string_view<char)"}, "std::string_view");
-    
-    // Replace "std::basic_regex<char>" -> "std::regex"
-    // TODO:
-    
-    // Remove "std::__something::allocator<whatever>"
-    replace_all_template(symbol, std::regex{R"(,\s*std(::[a-zA-Z0-9_]+)?::allocator<)"}, "");
+    // Remove "std::allocator<whatever>"
+    replace_all_template(symbol, std::regex{R"(, std::allocator<)"}, "");
     // it is technically a lossy conversion, but 99% of the time what we want is to remove default allocator
-    
-    // Remove "std::__something::default_delete<whatever>"
-    replace_all_template(symbol, std::regex{R"(,\s*std(::[a-zA-Z0-9_]+)?::default_delete<)"}, "");
+
+    // Remove "std::default_delete<whatever>"
+    replace_all_template(symbol, std::regex{R"(, std::default_delete<)"}, "");
     // it is technically a lossy conversion, but 99% of the time what we want is to remove default deleter
+
+    // Replace "std::basic_something<char>" -> "std::something"
+    replace_all(symbol, "std::basic_string<char>", "std::string");
+    replace_all(symbol, "std::basic_string_view<char>", "std::string_view");
+    replace_all(symbol, "std::basic_regex<char>", "std::regex");
     
+    // '<format>' template simplifications
+    replace_all(symbol, "std::basic_format_string<char>", "std::format_string");
+    replace_all(symbol, "std::basic_format_parse_context<char>", "std:format_parse_context");
+    replace_all(symbol, "std::basic_format_args<std::format_context>", "std::format_args");
+    // TODO: refine and complete this section, some templates require non-trivial work to simplify
+
     // Replace "std::ratio<1, 10^N>" with standard ratios
     replace_all(symbol, "std::ratio<1, 1000000000000>", "std::pico");
     replace_all(symbol, "std::ratio<1, 1000000000>", "std::nano");
@@ -117,13 +128,40 @@ std::string cbp::symbol::prettify(std::string symbol) {
     replace_all(symbol, "std::ratio<1000000, 1>", "std::mega");
     replace_all(symbol, "std::ratio<1000000000, 1>", "std::giga");
     replace_all(symbol, "std::ratio<1000000000000, 1>", "std::tera");
-    
-    // Replace "std::chrono::duration<rep, ratio>" with standard units
-    // TODO:
-    
+
+    // Replace "std::chrono::duration<rep, ratio>" with standard duration units
+    replace_all(symbol, "std::chrono::duration<long long, std::nano>", "std::chrono::nanoseconds");
+    replace_all(symbol, "std::chrono::duration<long long, std::micro>", "std::chrono::microseconds");
+    replace_all(symbol, "std::chrono::duration<long long, std::milli>", "std::chrono::milliseconds");
+    replace_all(symbol, "std::chrono::duration<long long>", "std::chrono::seconds");
+    replace_all(symbol, "std::chrono::duration<long, std::ratio<60>>", "std::chrono::minutes");
+    replace_all(symbol, "std::chrono::duration<long, std::ratio<3600>", "std::chrono::hours");
+    replace_all(symbol, "std::chrono::duration<int, std::ratio<86400>>", "std::chrono::days");
+    replace_all(symbol, "std::chrono::duration<int, std::ratio<604800>>", "std::chrono::weeks");
+    replace_all(symbol, "std::chrono::duration<int, std::ratio<2629746>>", "std::chrono::months");
+    replace_all(symbol, "std::chrono::duration<int, std::ratio<31556952>>", "std::chrono::years");
+
+    // Shorten explicitly expanded transparent functors
+    replace_all(symbol, "std::plus<void>", "std::plus<>");
+    replace_all(symbol, "std::minus<void>", "std::minus<>");
+    replace_all(symbol, "std::multiplies<void>", "std::multiplies<>");
+    replace_all(symbol, "std::divides<void>", "std::divides<>");
+    replace_all(symbol, "std::modulus<void>", "std::modulus<>");
+    replace_all(symbol, "std::negate<void>", "std::negate<>");
+    replace_all(symbol, "std::equal_to<void>", "std::equal_to<>");
+    replace_all(symbol, "std::not_equal_to<void>", "std::not_equal_to<>");
+    replace_all(symbol, "std::greater<void>", "std::greater<>");
+    replace_all(symbol, "std::less<void>", "std::less<>");
+    replace_all(symbol, "std::greater_equal<void>", "std::greater_equal<>");
+    replace_all(symbol, "std::less_equal<void>", "std::less_equal<>");
+
+    // TODO: Simplification for lambdas like
+    // "something<(lambda at
+    // /home/georgehaldane/Documents/PROJECTS/CPP/clang-build-profiler/proj/include/external/argparse/argparse.hpp:701:12)>"
+    // -> "something<(lambda at argparse.hpp:701)>"
+
     // Remove ABI suffixes like "[abi:ne210103]"
     replace_all(symbol, std::regex{R"(\[abi:[a-zA-Z0-9]+\])"}, "");
-    // these are usually encountered after function names
-    
+
     return symbol;
 }

@@ -23,8 +23,18 @@
             "inherits": [ "base" ],
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "clang++",
-                "CR_COMPILER_FLAGS": "-stdlib=libc++;-O0;-g3;-Wall;-Wextra;-Wpedantic;-Wno-unused-parameter;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;-ftime-trace;-ftime-trace-verbose",
+                "CR_COMPILER_FLAGS": "-stdlib=libc++;-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;-ftime-trace",
                 "CR_LINKER_FLAGS": "-stdlib=libc++;-fsanitize=address,undefined"
+            }
+        },
+        {
+            "name": "clang-release",
+            "description": "Clang configuration variables for Release.",
+            "inherits": [ "base" ],
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CR_COMPILER_FLAGS": "-stdlib=libc++;-O3;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-ftime-trace",
+                "CR_LINKER_FLAGS": "-stdlib=libc++"
             }
         }
     ],
@@ -36,7 +46,8 @@
             "hidden": true,
             "jobs": 4
         },
-        { "name": "clang", "configurePreset": "clang", "inherits": [ "base" ] }
+        { "name": "clang"        , "configurePreset": "clang"        , "inherits": [ "base" ] },
+        { "name": "clang-release", "configurePreset": "clang-release", "inherits": [ "base" ] }
     ],
     
     "testPresets": [
@@ -51,6 +62,7 @@
                 "timeout": 60
             }
         },
-        { "name": "clang", "configurePreset": "clang", "inherits": [ "base" ] }
+        { "name": "clang"        , "configurePreset": "clang"        , "inherits": [ "base" ] },
+        { "name": "clang-release", "configurePreset": "clang-release", "inherits": [ "base" ] }
     ]
 }

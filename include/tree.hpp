@@ -49,13 +49,18 @@
 namespace cbp {
 
 enum class tree_type {
+    // clang-format off
     targets,
-    target,
-    translation_unit,
-    parsing,
-    source_parsing,
-    instantiation,
-    source_instantiation
+        target,
+            translation_unit,
+                parsing,
+                    parse,
+                instantiation,
+                    instantiate,
+                llvm_codegen,
+                optimization,
+                native_codegen
+    // clang-format on
 };
 
 struct tree {
@@ -102,5 +107,5 @@ struct glz::meta<cbp::tree_type> {
     using enum cbp::tree_type;
 
     static constexpr auto value =
-        glz::enumerate(targets, target, translation_unit, parsing, source_parsing, instantiation, source_instantiation);
+        glz::enumerate(targets, target, translation_unit, parsing, parse, instantiation, instantiate);
 };
