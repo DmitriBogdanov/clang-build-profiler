@@ -96,7 +96,10 @@ std::string cbp::symbol::prettify(std::string symbol) {
 
     // Replace "std::__something::basic_string_view" -> "std::string_view"
     replace_all_template(symbol, std::regex{R"(std(::[a-zA-Z0-9_]+)?::basic_string_view<char)"}, "std::string_view");
-
+    
+    // Replace "std::basic_regex<char>" -> "std::regex"
+    // TODO:
+    
     // Remove "std::__something::allocator<whatever>"
     replace_all_template(symbol, std::regex{R"(,\s*std(::[a-zA-Z0-9_]+)?::allocator<)"}, "");
     // it is technically a lossy conversion, but 99% of the time what we want is to remove default allocator
@@ -104,10 +107,23 @@ std::string cbp::symbol::prettify(std::string symbol) {
     // Remove "std::__something::default_delete<whatever>"
     replace_all_template(symbol, std::regex{R"(,\s*std(::[a-zA-Z0-9_]+)?::default_delete<)"}, "");
     // it is technically a lossy conversion, but 99% of the time what we want is to remove default deleter
-
+    
+    // Replace "std::ratio<1, 10^N>" with standard ratios
+    replace_all(symbol, "std::ratio<1, 1000000000000>", "std::pico");
+    replace_all(symbol, "std::ratio<1, 1000000000>", "std::nano");
+    replace_all(symbol, "std::ratio<1, 1000000>", "std::micro");
+    replace_all(symbol, "std::ratio<1, 1000>", "std::milli");
+    replace_all(symbol, "std::ratio<1000, 1>", "std::kilo");
+    replace_all(symbol, "std::ratio<1000000, 1>", "std::mega");
+    replace_all(symbol, "std::ratio<1000000000, 1>", "std::giga");
+    replace_all(symbol, "std::ratio<1000000000000, 1>", "std::tera");
+    
+    // Replace "std::chrono::duration<rep, ratio>" with standard units
+    // TODO:
+    
     // Remove ABI suffixes like "[abi:ne210103]"
     replace_all(symbol, std::regex{R"(\[abi:[a-zA-Z0-9]+\])"}, "");
     // these are usually encountered after function names
-
+    
     return symbol;
 }
