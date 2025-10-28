@@ -15,8 +15,8 @@
 #include "config.hpp"
 #include "display_string.hpp"
 #include "exception.hpp"
-#include "version.hpp"
 #include "json.hpp" // TEMP:
+#include "version.hpp"
 
 
 template <class... Args>
@@ -82,12 +82,18 @@ int main(int argc, char* argv[]) try {
         .help("Selects CMake build directory"); //
 
     artifact_group                                  //
-        .add_argument("-d", "--directory")          //
+        .add_argument("-t", "--target")             //
         .help("Selects build artifacts directory"); //
 
     artifact_group                                  //
         .add_argument("-f", "--file")               //
         .help("Selects specific translation unit"); //
+
+    cli                                             //
+        .add_argument("-o", "--output")             //
+        .choices("gui", "terminal", "text", "json") //
+        .default_value(std::string{"terminal"})     //
+        .help("Selects profiling output format");   //
 
     try {
         cli.parse_args(argc, argv);
@@ -100,43 +106,39 @@ int main(int argc, char* argv[]) try {
 
     const cbp::config config =
         std::filesystem::exists(config_path) ? cbp::config::from_file(config_path) : cbp::config{};
-    
+
     if (const auto err = config.validate()) exit_failure("Config validation error:\n{}", err.value());
-        
-    // Handle specific translation unit
+
+    // Set profile
+    cbp::profile profile;
+
+    profile.config = config;
+
+    // Analyze the required file / target / build
     if (cli.is_used("--file")) {
         const std::string path = cli.get<std::string>("--file");
 
-        std::println("Analyzing translation unit {{ {} }}...", path);
+        std::println("\nAnalyzing translation unit {{ {} }}...\n", path);
 
-        cbp::profile profile;
-        profile.tree   = cbp::analyze_translation_unit(path);
-        profile.config = config;
+        profile.tree = cbp::analyze_translation_unit(path);
+    } else if (cli.is_used("--target")) {
+        const std::string path = cli.get<std::string>("--target");
 
-        std::println("{}", cbp::display::string::serialize(profile, true));
-        
-        cbp::write_file_json("tree.json", profile.tree);
+        std::println("\nAnalyzing target {{ {} }}...\n", path);
 
-        exit_success("Finished.");
-    }
-    // Handle artifact directory
-    else if (cli.is_used("--directory")) {
-        const std::string path = cli.get<std::string>("--directory");
-
-        std::println("Analyzing build directory {{ {} }}...", path);
-
-        // TODO:
-
-        exit_failure("Not implemented yet.");
-    }
-    // Handle CMake build
-    else {
+        profile.tree = cbp::analyze_target(path);
+    } else {
         const std::string path = cli.get<std::string>("--build");
 
-        std::println("Analyzing CMake build {{ {} }}...", path);
+        std::println("\nAnalyzing CMake build {{ {} }}...\n", path);
 
-        // TODO:
+        profile.tree = cbp::analyze_build(path);
+    }
 
+    // Serialize the output
+    if (cli.get("--output") == "terminal") {
+        std::println("{}", cbp::display::string::serialize(profile));
+    } else {
         exit_failure("Not implemented yet.");
     }
 } catch (cbp::exception& e) {

@@ -10,8 +10,6 @@
 #include <cassert>
 #include <regex>
 
-#include "external/UTL/profiler.hpp" // TEMP:
-
 
 void replace_all(std::string& str, std::string_view from, std::string_view to) {
     std::size_t i = 0;
@@ -36,7 +34,7 @@ void replace_all(std::string& str, const std::regex& from, std::string_view to) 
     }
 }
 
-void replace_all_while_possible(std::string& str, std::string_view from, std::string_view to) {
+void replace_all_dynamically(std::string& str, std::string_view from, std::string_view to) {
     std::size_t i = 0;
 
     assert(from.empty() || !from.substr(1).contains(to));
@@ -79,8 +77,8 @@ void replace_all_template(std::string& str, const std::regex& from, std::string_
 std::string cbp::symbol::prettify(std::string symbol) {
 
     // Normalize angle brackets: "> >" -> ">>"
-    replace_all_while_possible(symbol, "> >", ">>");
-    
+    replace_all_dynamically(symbol, "> >", ">>");
+
     // Normalize pointer & reference spacing
     replace_all(symbol, std::regex{R"(\s*\*)"}, "*");
     replace_all(symbol, std::regex{R"(\s*&)"}, "&");
@@ -112,7 +110,7 @@ std::string cbp::symbol::prettify(std::string symbol) {
     replace_all(symbol, "std::basic_string<char>", "std::string");
     replace_all(symbol, "std::basic_string_view<char>", "std::string_view");
     replace_all(symbol, "std::basic_regex<char>", "std::regex");
-    
+
     // '<format>' template simplifications
     replace_all(symbol, "std::basic_format_string<char>", "std::format_string");
     replace_all(symbol, "std::basic_format_parse_context<char>", "std:format_parse_context");

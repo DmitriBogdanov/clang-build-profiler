@@ -84,14 +84,25 @@ struct to<JSON, cbp::milliseconds> {
 namespace cbp {
 
 template <glz::read_supported<glz::JSON> T, auto opts = glz::opts{.error_on_unknown_keys = false}>
-[[nodiscard]] T read_file_json(std::string_view path) {
+[[nodiscard]] std::expected<T, std::string> try_read_file_json(std::string_view path) {
     T                    value;
     std::string          buffer;
     const glz::error_ctx err = glz::read_file_json<opts>(value, path, buffer);
 
-    if (err) throw cbp::exception{"Could not read JSON at {{ {} }}, error:\n{}", path, glz::format_error(err)};
+    if (err) {
+        std::string context = std::format("Could not read JSON at {{ {} }}, error:\n{}", path, glz::format_error(err));
+        return std::unexpected{std::move(context)};
+    }
 
     return value;
+}
+
+template <glz::read_supported<glz::JSON> T, auto opts = glz::opts{.error_on_unknown_keys = false}>
+[[nodiscard]] T read_file_json(std::string_view path) {
+    auto result = try_read_file_json<T, opts>(path);
+
+    if (result) return result.value();
+    else throw cbp::exception{result.error()};
 }
 
 template <glz::read_supported<glz::JSON> T>
