@@ -8,23 +8,35 @@ project(
     HOMEPAGE_URL "https://github.com/DmitriBogdanov/clang-build-report"
 )
 
-add_executable(
-    clang-build-profiler
-    "source/main.cpp"
-    "source/analyze.cpp"
-    "source/colors.cpp"
-    "source/config.cpp"
-    "source/demangle.cpp"
-    "source/display_string.cpp"
-    "source/prettify.cpp"
-    "source/tree.cpp"
-    "source/version.cpp"
-)
+# include(FetchContent)
+# FetchContent_Declare(
+#   saucer
+#   GIT_REPOSITORY https://github.com/saucer/saucer
+#   GIT_TAG        v7.0.1
+# )
+# FetchContent_MakeAvailable(saucer)
+
+add_executable(clang-build-profiler)
 
 target_include_directories(
     clang-build-profiler PRIVATE
     "include/"
     "include/external/"
+)
+
+target_sources(
+    clang-build-profiler PRIVATE
+    "source/main.cpp"
+    "source/backend/analyze.cpp"
+    "source/backend/config.cpp"
+    "source/backend/invoke.cpp"
+    "source/frontend/mkdocs.cpp"
+    "source/frontend/terminal.cpp"
+    "source/utility/colors.cpp"
+    "source/utility/demangle.cpp"
+    "source/utility/prettify.cpp"
+    "source/utility/replace.cpp"
+    "source/utility/version.cpp"
 )
 
 target_compile_features(clang-build-profiler PRIVATE ${CR_COMPILE_FEATURES})

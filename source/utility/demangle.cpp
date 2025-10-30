@@ -5,14 +5,15 @@
 // This project is licensed under the MIT License.
 // _________________________________________________________________________________
 
-#include "demangle.hpp"
+#include "utility/demangle.hpp"
 
 
 // --- Detect platform ---
 // -----------------------
 
+#if defined (__has_include) && __has_include(<cxxabi.h>)
 #define CBP_DEMANGLE_WITH_CXXABI // TODO: Implement demangle for Windows
-
+#endif
 
 // --- <cxxabi> demangling ---
 // ---------------------------
@@ -25,7 +26,7 @@
 
 #include <cxxabi.h>
 
-#include "exception.hpp"
+#include "utility/exception.hpp"
 
 struct c_str_deleter {
     void operator()(char* c_str) { std::free(c_str); }
@@ -51,13 +52,21 @@ std::string cbp::symbol::demangle(const std::string& symbol) {
     return std::string{result.get()};
 }
 
-#endif
-
 // --- WinAPI demangling ---
 // -------------------------
 
-#ifdef CBP_DEMANGLE_WITH_WINAPI
+#elif defined(CBP_DEMANGLE_WITH_WINAPI)
 
-// TODO:
+std::string cbp::symbol::demangle(const std::string& identifier) {
+    // TODO: Implement using Win32 Debug Helper API
+    return identifier;
+}
+
+// --- Fallback ---
+// ----------------
+
+#else
+
+std::string cbp::symbol::demangle(const std::string& identifier) { return identifier; }
 
 #endif

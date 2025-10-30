@@ -6,8 +6,8 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// ABI demangling. Clang traces store symbols in a mangled form, so we
-// have to do some work to turn them back into a human-readable state.
+// ABI demangling. Clang traces stores some symbols in a mangled form, so
+// we have to do some work to turn them back into a human-readable state.
 // _________________________________________________________________________________
 
 #pragma once
@@ -19,4 +19,4 @@ namespace cbp::symbol {
 
 std::string demangle(const std::string& symbol);
 
-} // namespace cbp
+} // namespace cbp::symbol

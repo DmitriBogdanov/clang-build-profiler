@@ -11,15 +11,15 @@
 
 #pragma once
 
+#include "backend/tree.hpp"
 #include "config.hpp"
-#include "tree.hpp"
 
 
 namespace cbp {
 
 struct profile {
-    tree   tree;
-    config config;
+    cbp::tree   tree;
+    cbp::config config;
 
     // TODO: summary
 };

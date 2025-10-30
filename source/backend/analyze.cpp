@@ -5,15 +5,10 @@
 // This project is licensed under the MIT License.
 // _________________________________________________________________________________
 
-#include "analyze.hpp"
+#include "backend/analyze.hpp"
 
-#include <filesystem>
-#include <stack>
-
-#include "exception.hpp"
-#include "prettify.hpp"
-#include "profile.hpp"
-#include "trace.hpp"
+#include "backend/trace.hpp"
+#include "utility/exception.hpp"
 
 
 // --- Implementation utils ---
@@ -62,12 +57,6 @@ cbp::trace::event extract_event_by_name(std::vector<cbp::trace::event>& events, 
     if (!result) throw cbp::exception{"Could not extact event with the name {{ {} }} from trace", name};
 
     return result.value();
-}
-
-[[nodiscard]] std::string normalize_path(std::filesystem::path path) {
-    return path.lexically_normal().string();
-    // Note: Normalizing paths leads to a nicer output, otherwise we can end
-    //       up with names like 'lib/bin/../include/' instead of 'lib/include/'
 }
 
 
@@ -203,15 +192,9 @@ cbp::tree build_instantiation_subtree(event_span instantiation_events) {
     return instantiation_tree;
 }
 
-
-// --- Analyze translation unit ---
-// --------------------------------
-
-cbp::tree cbp::analyze_translation_unit(std::string_view path) try {
-    // Read the trace & order events chronologically
-    auto trace = cbp::read_file_json<cbp::trace>(path);
-
-    if (trace.events.empty()) throw cbp::exception{"Trace parsed from {{ {} }} contains no events", path};
+// --- ---
+cbp::tree cbp::analyze_trace(cbp::trace trace, std::string_view name) try {
+    if (trace.events.empty()) throw cbp::exception{"Could not analyze an empty trace"};
     // this should never trigger for a correct trace
 
     std::stable_sort(trace.events.begin(), trace.events.end());
@@ -219,7 +202,7 @@ cbp::tree cbp::analyze_translation_unit(std::string_view path) try {
     // Create root node
     auto translation_unit_tree = cbp::tree{
         .type  = cbp::tree_type::translation_unit,                    //
-        .name  = normalize_path(path),                                //
+        .name  = std::string{name},                                   //
         .total = trace.events.back().time - trace.events.front().time //
     };
 
@@ -272,95 +255,6 @@ cbp::tree cbp::analyze_translation_unit(std::string_view path) try {
     translation_unit_tree.children.push_back(std::move(optimization_subtree));
     translation_unit_tree.children.push_back(std::move(native_codegen_subtree));
 
-    // Prettify names
-    translation_unit_tree.for_all_children([](cbp::tree& child) {
-        if (child.type == cbp::tree_type::parse) child.name = normalize_path(std::move(child.name));
-        // if (child.type == cbp::tree_type::instantiate) child.name = cbp::symbol::prettify(std::move(child.name));
-    });
-
     return translation_unit_tree;
 
-} catch (std::exception& e) { throw cbp::exception{"Could not analyze file {{ {} }}, error:\n{}", path, e.what()}; }
-
-// --- Analyze target ---
-// ----------------------
-
-cbp::tree cbp::analyze_target(std::string_view path) try {
-
-    if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path))
-        throw cbp::exception{"Target path {{ {} }} does not point to a valid directory", path};
-
-    // Create root node
-    auto target_tree = cbp::tree{.type = cbp::tree_type::target, .name = std::string(path)};
-
-    // Recursively iterate all JSON files in a 'path' directory
-    for (const auto& entry : std::filesystem::recursive_directory_iterator{path}) {
-        if (!entry.is_regular_file()) continue;
-        if (!entry.path().has_extension()) continue;
-        if (entry.path().extension() != ".json") continue;
-
-        // Parse the trace or skip it if JSON doesn't match the expected schema
-        const std::string filepath = entry.path().string();
-
-        cbp::trace  trace;
-        std::string buffer;
-
-        const glz::error_ctx err =
-            glz::read_file_json<glz::opts{.error_on_unknown_keys = false}>(trace, filepath, buffer);
-
-        if (err) {
-            std::println("Skipping {{ {} }}, doesn't match the trace schema.", filepath);
-            std::println("Error => {}", glz::format_error(err));
-            continue;
-        }
-
-        // Analyze translation unit
-        target_tree.children.push_back(cbp::analyze_translation_unit(filepath));
-    }
-
-    // Gather root node timing
-    for (const auto& child : target_tree.children) target_tree.total += child.total;
-
-    return target_tree;
-
-} catch (std::exception& e) { throw cbp::exception{"Could not analyze target {{ {} }}, error:\n{}", path, e.what()}; }
-
-// --- Analyze build ---
-// ---------------------
-
-cbp::tree cbp::analyze_build(std::string_view path) try {
-
-    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path))
-        throw cbp::exception{"Build path {{ {} }} does no point to a valid directory", path};
-
-    const std::filesystem::path target_directories_path =
-        std::filesystem::path{path} / "CMakeFiles" / "TargetDirectories.txt";
-
-    if (!std::filesystem::exists(target_directories_path)) throw cbp::exception{"Could not locate file {{ {} }}", path};
-
-    // Every CMake target has a corresponding directory, mentioned in the 'TargetDirectories.txt"',
-    // however it also contains a few internal CMake targets that we need to ignore. We want to
-    // parse those target paths and then analyze them one-by-one.
-    std::vector<std::string> target_directories;
-
-    auto target_directories_file = std::ifstream{target_directories_path};
-
-    std::string line;
-    while (std::getline(target_directories_file, line)) {
-        if (line.ends_with("edit_cache.dir") || line.ends_with("rebuild_cache.dir")) continue;
-        target_directories.push_back(std::move(line));
-    }
-
-    // Create root node
-    auto target_tree = cbp::tree{.type = cbp::tree_type::targets, .name = "Targets"};
-
-    // Analyze targets
-    for (const auto& target_directory : target_directories)
-        target_tree.children.push_back(cbp::analyze_target(target_directory));
-
-    // Gather root node timing
-    for (const auto& child : target_tree.children) target_tree.total += child.total;
-
-    return target_tree;
-
-} catch (std::exception& e) { throw cbp::exception{"Could not analyze build {{ {} }}, error:\n{}", path, e.what()}; }
+} catch (std::exception& e) { throw cbp::exception{"Could not analyze trace, error:\n{}", e.what()}; }

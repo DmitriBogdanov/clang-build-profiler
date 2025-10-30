@@ -17,8 +17,12 @@
 #include <string>
 
 
-namespace cbp::symbol {
+namespace cbp::prettify {
 
-[[nodiscard]] std::string prettify(std::string identifier);
-
+[[nodiscard]] std::string normalize(std::string identifier);
+[[nodiscard]] std::string deobfuscate(std::string identifier);
+[[nodiscard]] std::string collapse(std::string identifier);
+    
+[[nodiscard]] std::string full(std::string identifier);
+    
 }

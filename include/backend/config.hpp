@@ -15,8 +15,8 @@
 #include <string>
 #include <vector>
 
-#include "time.hpp"
-#include "version.hpp"
+#include "utility/time.hpp"
+#include "utility/version.hpp"
 
 
 namespace cbp {
@@ -26,27 +26,22 @@ struct config {
     // --- Subclasses ---
     // ------------------
 
-    struct category {
-        milliseconds duration = {};
-        std::string  color    = {};
+    struct categorization {
+        cbp::milliseconds gray   = cbp::milliseconds{0  };
+        cbp::milliseconds white  = cbp::milliseconds{50 };
+        cbp::milliseconds yellow = cbp::milliseconds{150};
+        cbp::milliseconds red    = cbp::milliseconds{300};
     };
 
-    struct prefix_replacement {
+    struct prefix_replacement_rule {
         std::string from = {};
         std::string to   = {};
     };
 
     struct tree_section {
-        bool enabled = true;
+        categorization categorize;
 
-        std::vector<category> categorize = {
-            category{.duration = milliseconds{300}, .color = "red"   },
-            category{.duration = milliseconds{150}, .color = "yellow"},
-            category{.duration = milliseconds{50},  .color = "white" },
-            category{.duration = milliseconds{0},   .color = "gray"  }
-        };
-
-        std::vector<prefix_replacement> replace_prefix = {};
+        std::vector<prefix_replacement_rule> replace_prefix = {};
     };
 
     // --- Members ---
@@ -63,9 +58,6 @@ struct config {
 
     static config from_string(std::string_view str);
     static config from_file(std::string_view path);
-
-    std::string to_string() const;
-    void        to_file(std::string_view path) const;
 
     std::optional<std::string> validate() const;
 };

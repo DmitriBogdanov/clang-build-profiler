@@ -5,9 +5,9 @@
 // This project is licensed under the MIT License.
 // _________________________________________________________________________________
 
-#include "colors.hpp"
+#include "utility/colors.hpp"
 
-#include "exception.hpp"
+#include "utility/exception.hpp"
 
 
 std::string_view cbp::color_from_name(std::string_view name) {

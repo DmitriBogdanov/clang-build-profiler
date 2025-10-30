@@ -1,3 +1,16 @@
+// ____________________________________ LICENSE ____________________________________
+//
+// Source repo: https://github.com/DmitriBogdanov/clang-build-profiler
+//
+// This project is licensed under the MIT License.
+//
+// ____________________________________ CONTENT ____________________________________
+//
+// A custom exception class used throughout the codebase, it carries source location
+// info and supports C++20 <format> strings in constructor, which makes diagnostics
+// nicer. Chaining & rethrowing such exceptions can even accomplish a pseudo-stacktrace.
+// _________________________________________________________________________________
+
 #pragma once
 
 #include <format>

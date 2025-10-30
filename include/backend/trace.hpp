@@ -11,12 +11,11 @@
 
 #pragma once
 
-#include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
 
-#include "json.hpp"
+#include "utility/json.hpp"
 
 
 namespace cbp {
@@ -29,12 +28,12 @@ namespace cbp {
 struct trace {
 
     struct event {
-        std::string                 name{};     // usually fits into SSO
-        std::string                 type{};     // always contains a single char
-        std::uint64_t               thread{};   // most of the compilation is really single-threaded
-        microseconds                time{};     // stored in us
-        std::optional<microseconds> duration{}; // stored in us
-        glz::generic                args{};     // schema varies based on event name and compiler flags
+        std::string                      name{};     // - usually fits into SSO
+        std::string                      type{};     // - always contains a single char
+        std::uint64_t                    thread{};   // - most of the compilation is really single-threaded
+        cbp::microseconds                time{};     // - some things are traced as a single event with
+        std::optional<cbp::microseconds> duration{}; //   duration, others use a begin + end event pair
+        glz::generic                     args{};     // - schema varies based on event name and compiler flags
 
         auto operator<=>(const event& other) const {
             return this->time <=> other.time; // makes events orderable by time
@@ -42,7 +41,7 @@ struct trace {
     };
 
     std::vector<event> events{};
-    microseconds       start_time{};
+    cbp::microseconds  start_time{};
 };
 
 } // namespace cbp

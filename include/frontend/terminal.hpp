@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include "profile.hpp"
+#include "backend/profile.hpp"
 
 
-namespace cbp::display::string {
-
-[[nodiscard]] std::string serialize(const profile& profile, bool colors = true);
-
+namespace cbp::output {
+    
+void terminal(const cbp::profile& profile);
+    
 }

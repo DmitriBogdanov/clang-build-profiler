@@ -11,12 +11,23 @@
 
 #include "external/argparse/argparse.hpp"
 
-#include "analyze.hpp"
-#include "config.hpp"
-#include "display_string.hpp"
-#include "exception.hpp"
-#include "json.hpp" // TEMP:
-#include "version.hpp"
+#include "backend/config.hpp"
+#include "backend/invoke.hpp"
+#include "backend/profile.hpp"
+#include "frontend/mkdocs.hpp"
+#include "frontend/terminal.hpp"
+#include "utility/exception.hpp"
+#include "utility/version.hpp"
+
+// TEMP:
+#include "utility/prettify.hpp"
+
+[[nodiscard]] std::string normalize_path(std::filesystem::path path) {
+    return path.lexically_normal().string();
+    // Note: Normalizing paths leads to a nicer output, otherwise we can end
+    //       up with names like 'lib/bin/../include/' instead of 'lib/include/'
+}
+// TEMP:
 
 
 template <class... Args>
@@ -89,11 +100,11 @@ int main(int argc, char* argv[]) try {
         .add_argument("-f", "--file")               //
         .help("Selects specific translation unit"); //
 
-    cli                                             //
-        .add_argument("-o", "--output")             //
-        .choices("gui", "terminal", "text", "json") //
-        .default_value(std::string{"terminal"})     //
-        .help("Selects profiling output format");   //
+    cli                                                //
+        .add_argument("-o", "--output")                //
+        .choices("terminal", "mkdocs", "text", "json") //
+        .default_value(std::string{"terminal"})        //
+        .help("Selects profiling output format");      //
 
     try {
         cli.parse_args(argc, argv);
@@ -135,9 +146,36 @@ int main(int argc, char* argv[]) try {
         profile.tree = cbp::analyze_build(path);
     }
 
+    // Prettify the results
+    profile.tree.for_all([&](cbp::tree& tree) {
+        // Note: This can be done better without a double pass
+
+        // Prune nodes
+        const auto it = std::remove_if(tree.children.begin(), tree.children.end(), [&](const cbp::tree& child) {
+            const bool is_node   = std::to_underlying(child.type & cbp::tree_type::node);
+            const bool can_prune = child.total < profile.config.tree.categorize.gray;
+            return is_node && can_prune;
+        });
+
+        tree.children.erase(it, tree.children.end());
+
+        // Categorize
+        if (tree.total > profile.config.tree.categorize.red) tree.category = cbp::tree_category::red;
+        else if (tree.total > profile.config.tree.categorize.yellow) tree.category = cbp::tree_category::yellow;
+        else if (tree.total > profile.config.tree.categorize.white) tree.category = cbp::tree_category::white;
+        else if (tree.total > profile.config.tree.categorize.gray) tree.category = cbp::tree_category::gray;
+
+        // Prettify names
+        // if (tree.type == cbp::tree_type::parse) tree.name = normalize_path(std::move(tree.name));
+        // else if (tree.type == cbp::tree_type::translation_unit) tree.name = normalize_path(std::move(tree.name));
+        // else if (tree.type == cbp::tree_type::instantiate) tree.name = cbp::prettify::full(std::move(tree.name));
+    });
+
     // Serialize the output
     if (cli.get("--output") == "terminal") {
-        std::println("{}", cbp::display::string::serialize(profile));
+        cbp::output::terminal(profile);
+    } else if (cli.get("--output") == "mkdocs") {
+        cbp::output::mkdocs(profile);
     } else {
         exit_failure("Not implemented yet.");
     }

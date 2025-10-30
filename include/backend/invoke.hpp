@@ -6,17 +6,17 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// Functions for analyzing builds/directories/files, which turn clang traces
-// into some kind of in-memory structure that we can work with.
+// Functions for analyzing builds/directories/files, which handle the filesystem
+// & parsing and invoke the actual analysis backend.
 // _________________________________________________________________________________
 
 #pragma once
 
-#include "tree.hpp"
+#include "backend/tree.hpp"
 
 
 namespace cbp {
- 
+
 cbp::tree analyze_build(std::string_view path);
 cbp::tree analyze_target(std::string_view path);
 cbp::tree analyze_translation_unit(std::string_view path);

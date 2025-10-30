@@ -3,10 +3,19 @@
 // Source repo: https://github.com/DmitriBogdanov/clang-build-profiler
 //
 // This project is licensed under the MIT License.
+//
+// ____________________________________ CONTENT ____________________________________
+//
+// Logic for serializing profiling results to a string.
 // _________________________________________________________________________________
 
-#include "tree.hpp"
+#pragma once
 
-#include "exception.hpp"
+#include "backend/profile.hpp"
 
 
+namespace cbp::output {
+    
+void mkdocs(const cbp::profile& profile);
+    
+}

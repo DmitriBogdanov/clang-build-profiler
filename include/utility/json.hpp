@@ -6,8 +6,8 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// Wraps <glaze/json.hpp> library include, enables <chrono> parsing/serialization,
-// adds a simpler read/write API with errors through exceptions so can have a
+// Wraps <glaze/json.hpp> library include and enables <chrono> parsing/serialization.
+// Also adds a simpler read/write API with errors through exceptions so can have a
 // uniform error handling style throughout the codebase.
 // _________________________________________________________________________________
 
@@ -17,17 +17,17 @@
 
 #ifdef __clang__
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-braces" // false positive
+#pragma clang diagnostic ignored "-Wmissing-braces" // false positive in 'glaze'
 #endif
 
-#include "glaze/json.hpp" // IWYU pragma: export
+#include "external/glaze/json.hpp" // IWYU pragma: export
 
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
 
-#include "exception.hpp"
-#include "time.hpp"
+#include "utility/exception.hpp"
+#include "utility/time.hpp"
 
 
 // --- <chrono> parsing/serialization support ---
@@ -80,6 +80,10 @@ struct to<JSON, cbp::milliseconds> {
 
 // --- Read/write wrappers ---
 // ---------------------------
+
+// Glaze has a native throwing API in 'glaze::ex', but we want
+// to use our own exception type & error messages, this is also
+// a nice place to establish some defaults.
 
 namespace cbp {
 
