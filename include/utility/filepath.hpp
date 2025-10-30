@@ -6,16 +6,19 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// Output serialization for '--output=mkdocs'.
+// Functions for operating of filepath strings, used for prettification.
 // _________________________________________________________________________________
 
 #pragma once
 
-#include "backend/profile.hpp"
+#include <string>
+#include <string_view>
 
 
-namespace cbp::output {
-    
-void mkdocs(const cbp::profile& profile);
-    
-}
+namespace cbp {
+
+std::string_view trim_filepath(std::string_view path);
+
+std::string normalize_filepath(std::string path);
+
+} // namespace cbp

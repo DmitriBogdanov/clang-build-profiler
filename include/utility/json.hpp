@@ -51,7 +51,7 @@ struct from<JSON, cbp::microseconds> {
 template <>
 struct to<JSON, cbp::microseconds> {
     template <auto opts>
-    static void op(cbp::microseconds& value, is_context auto&& ctx, auto&& b, auto&& ix) noexcept {
+    static void op(const cbp::microseconds& value, is_context auto&& ctx, auto&& b, auto&& ix) noexcept {
         serialize<JSON>::op<opts>(value.count(), ctx, b, ix);
     }
 };
@@ -70,7 +70,7 @@ struct from<JSON, cbp::milliseconds> {
 template <>
 struct to<JSON, cbp::milliseconds> {
     template <auto opts>
-    static void op(cbp::milliseconds& value, is_context auto&& ctx, auto&& b, auto&& ix) noexcept {
+    static void op(const cbp::milliseconds& value, is_context auto&& ctx, auto&& b, auto&& ix) noexcept {
         serialize<JSON>::op<opts>(value.count(), ctx, b, ix);
     }
 };

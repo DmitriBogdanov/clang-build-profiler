@@ -6,7 +6,8 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// Logic for serializing profiling results to a string.
+// Generic logic for serializing profiling results to a string, formatter
+// instantiations with specific callbacks correspond to specific output formats.
 // _________________________________________________________________________________
 
 #pragma once

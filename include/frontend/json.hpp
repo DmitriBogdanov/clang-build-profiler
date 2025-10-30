@@ -6,7 +6,7 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// Output serialization for '--output=mkdocs'.
+// Output serialization for '--output=json'.
 // _________________________________________________________________________________
 
 #pragma once
@@ -16,6 +16,6 @@
 
 namespace cbp::output {
     
-void mkdocs(const cbp::profile& profile);
+void json(const cbp::profile& profile);
     
 }

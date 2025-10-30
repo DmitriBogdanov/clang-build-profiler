@@ -17,6 +17,8 @@
 #include <source_location>
 #include <stdexcept>
 
+#include "utility/filepath.hpp"
+
 
 namespace cbp {
 
@@ -49,18 +51,11 @@ class exception : public std::runtime_error {
         "\033[0m"                  // reset
         " {}";                     //
 
-    static std::string_view trim_filepath(std::string_view path) {
-        const std::size_t last_slash = path.find_last_of("/\\");
-
-        if (last_slash != std::string_view::npos && last_slash + 1 < path.size()) return path.substr(last_slash + 1);
-        return path;
-    }
-
 public:
     // Required API
     exception(std::string_view message, std::source_location loc = std::source_location::current())
         : std::runtime_error(
-              std::format(format, trim_filepath(loc.file_name()), loc.line(), loc.function_name(), message)) {}
+              std::format(format, cbp::trim_filepath(loc.file_name()), loc.line(), loc.function_name(), message)) {}
 
     exception(const exception& other) noexcept : std::runtime_error(other) {}
 

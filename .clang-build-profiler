@@ -1,0 +1,35 @@
+---
+version: "0.1.0"
+
+# The main profiling output
+tree:
+  # How to color the tree nodes
+  categorize:
+    gray  :   0 # duration >  50 ms => color gray
+    white : 100 # duration > 100 ms => color white
+    yellow: 150 # duration > 150 ms => color yellow
+    red   : 300 # duration > 300 ms => color red
+    
+    # Note: nodes without a color are hidden, to disable all pruning set 'gray' to '0'
+  
+  # Regex replacement rules to reduce filename verbosity
+  replace_prefix:
+    - from: "/usr/lib/llvm-21/include/c++/v1/"
+      to  : "std/"
+    - from: "/home/georgehaldane/Documents/PROJECTS/CPP/clang-build-profiler/proj/"
+      to  : ""
+
+# Summary of header files that took the longest time in total to parse
+parsing_summary:
+  enabled : true
+  quantity: 100
+
+# Summary of templates that took the longest time in total to instantiate
+instantiation_summary:
+  enabled : true
+  quantity: 100
+
+# Details about the tool invocation - time, config and etc.
+environment:
+  enabled: true
+  

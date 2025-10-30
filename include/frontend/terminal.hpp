@@ -6,7 +6,7 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// Logic for serializing profiling results to a string.
+// Output serialization for '--output=terminal'.
 // _________________________________________________________________________________
 
 #pragma once

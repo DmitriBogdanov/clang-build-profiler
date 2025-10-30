@@ -25,4 +25,6 @@ void replace_all_dynamically(std::string& str, std::string_view from, std::strin
 
 void replace_all_template(std::string& str, const std::regex& from, std::string_view to);
 
+void replace_all_template(std::string& str, std::string_view from, std::string_view to);
+
 } // namespace cbp

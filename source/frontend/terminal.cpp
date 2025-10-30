@@ -36,7 +36,7 @@ void cbp::output::terminal(const cbp::profile& profile) try {
         const std::string name =
             tree.name.size() < max_name_width ? tree.name : tree.name.substr(0, max_name_width) + "...";
 
-        constexpr auto fmt = "{}> {} ({} ms, {}%) | self ({} ms, {}%){}\n";
+        constexpr auto fmt = "{}> {} ({} ms, {:.2f}%) | self ({} ms, {:.2f}%){}\n";
 
         state.format(fmt, color, name, abs_total, rel_total, abs_self, rel_self, reset);
     };

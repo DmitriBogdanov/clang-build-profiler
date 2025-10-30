@@ -6,7 +6,8 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// Output serialization for '--output=mkdocs'.
+// Preprocessing of profiling results: tree pruning, color categorization,
+// path prettification, template prettification and etc. 
 // _________________________________________________________________________________
 
 #pragma once
@@ -14,8 +15,8 @@
 #include "backend/profile.hpp"
 
 
-namespace cbp::output {
-    
-void mkdocs(const cbp::profile& profile);
-    
+namespace cbp {
+
+void preprocess(cbp::profile& profile);
+
 }

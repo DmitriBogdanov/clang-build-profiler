@@ -44,20 +44,25 @@ void cbp::replace_all_dynamically(std::string& str, std::string_view from, std::
     //         infinite loop, for example "123" -> "0123", the check should guard against such patterns.
 }
 
-void cbp::replace_all_template(std::string& str, const std::regex& from, std::string_view to) {
-    std::smatch match;
+void cbp::replace_all_template(std::string& str, std::string_view from, std::string_view to) {
+    if (from.empty() || from.back() != '<')
+        throw cbp::exception{"Template replacement {{ {} }} to {{ {} }} is invalid", from, to};
+
     std::size_t i = 0;
 
-    while (std::regex_search(str.cbegin() + i, str.cend(), match, from)) {
-        // Find matching >
-        const std::size_t match_begin = i + match.position();
-        std::size_t       end         = match_begin + match.length();
-        for (int c = 1; end < str.size() && c > 0; ++end) {
-            if (str[end] == '<') ++c;
-            else if (str[end] == '>') --c;
-        }
+    while ((i = str.find(from, i)) != std::string::npos) { // locate substring to replace
+        // Expand replaced range until the closing '>' is found
+        std::size_t match_start       = i;
+        std::size_t match_end         = match_start + from.size();
+        std::size_t angle_brace_count = 1;
 
-        str.replace(match_begin, end - match_begin, to.data(), to.size()); // replace
-        i = match_begin + to.size();                                       // step over the replaced region
+        for (; match_end < str.size() && angle_brace_count; ++match_end) {
+            if (str[match_end] == '<') ++angle_brace_count;
+            else if (str[match_end] == '>') --angle_brace_count;
+        } // we assume angle braces should math, otherwise the whole rest of the string will be replaced
+
+        str.replace(i, match_end - match_start, to); // replace
+
+        i += to.size(); // step over the replaced region
     }
 }

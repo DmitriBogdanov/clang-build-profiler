@@ -44,11 +44,11 @@ cbp::config cbp::config::from_string(std::string_view str) try {
             const auto& categorize = tree.at("categorize");
 
             if (categorize.contains("gray"))
-                config.tree.categorize.red = cbp::milliseconds{categorize.at("gray").as_int()};
+                config.tree.categorize.gray = cbp::milliseconds{categorize.at("gray").as_int()};
             if (categorize.contains("white"))
-                config.tree.categorize.red = cbp::milliseconds{categorize.at("white").as_int()};
+                config.tree.categorize.white = cbp::milliseconds{categorize.at("white").as_int()};
             if (categorize.contains("yellow"))
-                config.tree.categorize.red = cbp::milliseconds{categorize.at("yellow").as_int()};
+                config.tree.categorize.yellow = cbp::milliseconds{categorize.at("yellow").as_int()};
             if (categorize.contains("red"))
                 config.tree.categorize.red = cbp::milliseconds{categorize.at("red").as_int()};
         }

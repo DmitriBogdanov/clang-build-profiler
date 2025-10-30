@@ -22,6 +22,7 @@ namespace cbp::prettify {
 [[nodiscard]] std::string normalize(std::string identifier);
 [[nodiscard]] std::string deobfuscate(std::string identifier);
 [[nodiscard]] std::string collapse(std::string identifier);
+[[nodiscard]] std::string shorten(std::string identifier);
     
 [[nodiscard]] std::string full(std::string identifier);
     

@@ -9,41 +9,38 @@
 // Program entry point. Handles CLI args and invokes the analyzer.
 // _________________________________________________________________________________
 
+#include "external/UTL/time.hpp"
 #include "external/argparse/argparse.hpp"
 
 #include "backend/config.hpp"
 #include "backend/invoke.hpp"
 #include "backend/profile.hpp"
+#include "frontend/json.hpp"
 #include "frontend/mkdocs.hpp"
+#include "frontend/preprocessor.hpp"
 #include "frontend/terminal.hpp"
 #include "utility/exception.hpp"
 #include "utility/version.hpp"
 
-// TEMP:
-#include "utility/prettify.hpp"
-
-[[nodiscard]] std::string normalize_path(std::filesystem::path path) {
-    return path.lexically_normal().string();
-    // Note: Normalizing paths leads to a nicer output, otherwise we can end
-    //       up with names like 'lib/bin/../include/' instead of 'lib/include/'
-}
-// TEMP:
-
+utl::time::Stopwatch stopwatch;
 
 template <class... Args>
 void exit_failure(std::format_string<Args...> fmt, Args&&... args) {
+    std::println("Execution failed with with code {}, elapsed time: {}", EXIT_FAILURE, stopwatch.elapsed_string());
     std::println(fmt, std::forward<Args>(args)...);
+
     std::exit(EXIT_FAILURE);
 }
 
 template <class... Args>
 void exit_success(std::format_string<Args...> fmt, Args&&... args) {
+    std::println("Execution finished, elapsed time: {}", stopwatch.elapsed_string());
     std::println(fmt, std::forward<Args>(args)...);
+
     std::exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char* argv[]) try {
-
     // Handle CLI args
     const std::string version = cbp::version::format_full();
 
@@ -115,6 +112,8 @@ int main(int argc, char* argv[]) try {
     // Parse config
     const std::string config_path = cli.get<std::string>("--config");
 
+    std::println("Parsing config {{ {} }}...", config_path);
+
     const cbp::config config =
         std::filesystem::exists(config_path) ? cbp::config::from_file(config_path) : cbp::config{};
 
@@ -129,13 +128,13 @@ int main(int argc, char* argv[]) try {
     if (cli.is_used("--file")) {
         const std::string path = cli.get<std::string>("--file");
 
-        std::println("\nAnalyzing translation unit {{ {} }}...\n", path);
+        std::println("Analyzing translation unit {{ {} }}...\n", path);
 
         profile.tree = cbp::analyze_translation_unit(path);
     } else if (cli.is_used("--target")) {
         const std::string path = cli.get<std::string>("--target");
 
-        std::println("\nAnalyzing target {{ {} }}...\n", path);
+        std::println("Analyzing target {{ {} }}...\n", path);
 
         profile.tree = cbp::analyze_target(path);
     } else {
@@ -147,38 +146,25 @@ int main(int argc, char* argv[]) try {
     }
 
     // Prettify the results
-    profile.tree.for_all([&](cbp::tree& tree) {
-        // Note: This can be done better without a double pass
+    std::println("Preprocessing results...");
 
-        // Prune nodes
-        const auto it = std::remove_if(tree.children.begin(), tree.children.end(), [&](const cbp::tree& child) {
-            const bool is_node   = std::to_underlying(child.type & cbp::tree_type::node);
-            const bool can_prune = child.total < profile.config.tree.categorize.gray;
-            return is_node && can_prune;
-        });
+    cbp::preprocess(profile);
 
-        tree.children.erase(it, tree.children.end());
+    // Invoke the frontend
+    std::println("Invoking frontend...");
 
-        // Categorize
-        if (tree.total > profile.config.tree.categorize.red) tree.category = cbp::tree_category::red;
-        else if (tree.total > profile.config.tree.categorize.yellow) tree.category = cbp::tree_category::yellow;
-        else if (tree.total > profile.config.tree.categorize.white) tree.category = cbp::tree_category::white;
-        else if (tree.total > profile.config.tree.categorize.gray) tree.category = cbp::tree_category::gray;
-
-        // Prettify names
-        // if (tree.type == cbp::tree_type::parse) tree.name = normalize_path(std::move(tree.name));
-        // else if (tree.type == cbp::tree_type::translation_unit) tree.name = normalize_path(std::move(tree.name));
-        // else if (tree.type == cbp::tree_type::instantiate) tree.name = cbp::prettify::full(std::move(tree.name));
-    });
-
-    // Serialize the output
     if (cli.get("--output") == "terminal") {
         cbp::output::terminal(profile);
     } else if (cli.get("--output") == "mkdocs") {
         cbp::output::mkdocs(profile);
+    } else if (cli.get("--output") == "json") {
+        cbp::output::json(profile);
     } else {
         exit_failure("Not implemented yet.");
     }
+
+    exit_success("");
+
 } catch (cbp::exception& e) {
     std::println("Terminated due to exception:\n{}", e.what());
     // we use a custom exception class with more debug info & colored formatting
