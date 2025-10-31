@@ -21,6 +21,8 @@
 # > CMake
 !CMakePresets.json
 !CMakeLists.txt
+!cmake/
+!cmake/**
 # > Scripts
 !bash/
 !bash/**

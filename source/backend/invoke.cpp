@@ -62,7 +62,11 @@ cbp::tree cbp::analyze_target(std::string_view path) try {
         }
 
         // Analyze translation unit
-        target_tree.children.push_back(cbp::analyze_trace(std::move(trace), filepath));
+        try {
+            target_tree.children.push_back(cbp::analyze_trace(std::move(trace), filepath));
+        } catch (std::exception& e) {
+            throw cbp::exception{"Could not analyze file {{ {} }}, error:\n{}", filepath, e.what()};
+        }
     }
 
     // Gather root node timing

@@ -40,6 +40,13 @@ void exit_success(std::format_string<Args...> fmt, Args&&... args) {
     std::exit(EXIT_SUCCESS);
 }
 
+template <class... Args>
+void exit_success_quiet(std::format_string<Args...> fmt, Args&&... args) {
+    std::println(fmt, std::forward<Args>(args)...);
+
+    std::exit(EXIT_SUCCESS);
+}
+
 int main(int argc, char* argv[]) try {
     // Handle CLI args
     const std::string version = cbp::version::format_full();
@@ -55,7 +62,7 @@ int main(int argc, char* argv[]) try {
         .flag()                        //
         .help("Displays help message") //
         .action([&](const auto&) {     //
-            exit_success("{}", cli.help().str());
+            exit_success_quiet("{}", cli.help().str());
         });
 
     cli                                       //
@@ -63,7 +70,7 @@ int main(int argc, char* argv[]) try {
         .flag()                               //
         .help("Displays application version") //
         .action([&](const auto&) {            //
-            exit_success("{}", version);
+            exit_success_quiet("{}", version);
         });
 
     cli                                                                         //
@@ -128,19 +135,19 @@ int main(int argc, char* argv[]) try {
     if (cli.is_used("--file")) {
         const std::string path = cli.get<std::string>("--file");
 
-        std::println("Analyzing translation unit {{ {} }}...\n", path);
+        std::println("Analyzing translation unit {{ {} }}...", path);
 
         profile.tree = cbp::analyze_translation_unit(path);
     } else if (cli.is_used("--target")) {
         const std::string path = cli.get<std::string>("--target");
 
-        std::println("Analyzing target {{ {} }}...\n", path);
+        std::println("Analyzing target {{ {} }}...", path);
 
         profile.tree = cbp::analyze_target(path);
     } else {
         const std::string path = cli.get<std::string>("--build");
 
-        std::println("\nAnalyzing CMake build {{ {} }}...\n", path);
+        std::println("Analyzing CMake build {{ {} }}...", path);
 
         profile.tree = cbp::analyze_build(path);
     }

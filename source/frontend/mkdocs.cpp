@@ -11,6 +11,29 @@
 #include "utility/replace.hpp"
 
 
+// Bring in embedded resource
+#include "cmrc/cmrc.hpp"
+CMRC_DECLARE(cbp);
+
+void copy_embedded_file(cmrc::embedded_filesystem& filesystem,    //
+                        std::string_view           resource_path, //
+                        std::string_view           output_path    //
+) {
+    const cmrc::file file = filesystem.open(std::string{resource_path});
+
+    std::ofstream{std::string{output_path}} << std::string{file.begin(), file.end()};
+}
+
+void copy_embedded_files() {
+    cmrc::embedded_filesystem filesystem = cmrc::cbp::get_filesystem();
+
+    copy_embedded_file(filesystem, "resources/mkdocs/mkdocs.yml", ".cbp/mkdocs.yml");
+    copy_embedded_file(filesystem, "resources/mkdocs/docs/admonitions.css", ".cbp/docs/admonitions.css");
+    copy_embedded_file(filesystem, "resources/mkdocs/docs/classes.css", ".cbp/docs/classes.css");
+    copy_embedded_file(filesystem, "resources/mkdocs/docs/width.css", ".cbp/docs/width.css");
+}
+
+// Output
 void cbp::output::mkdocs(const cbp::profile& profile) try {
 
     auto callback = [](cbp::formatter_state& state, const cbp::tree& tree) {
@@ -63,6 +86,9 @@ void cbp::output::mkdocs(const cbp::profile& profile) try {
 
     // Create files necessary for an MkDocs build
     std::ofstream(".cbp/docs/index.md") << std::format("# Profiling results\n\n{}", result);
+
+    // Copy MkDocs resources
+    copy_embedded_files();
 
 } catch (std::exception& e) {
     throw cbp::exception{"Could not output profile results to the terminal, error:\n{}", e.what()};

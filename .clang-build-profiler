@@ -5,7 +5,7 @@ version: "0.1.0"
 tree:
   # How to color the tree nodes
   categorize:
-    gray  :  30 # duration >  50 ms => color gray
+    gray  :  90 # duration >  50 ms => color gray
     white : 150 # duration > 100 ms => color white
     yellow: 300 # duration > 150 ms => color yellow
     red   : 800 # duration > 300 ms => color red

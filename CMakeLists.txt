@@ -8,14 +8,7 @@ project(
     HOMEPAGE_URL "https://github.com/DmitriBogdanov/clang-build-report"
 )
 
-# include(FetchContent)
-# FetchContent_Declare(
-#   saucer
-#   GIT_REPOSITORY https://github.com/saucer/saucer
-#   GIT_TAG        v7.0.1
-# )
-# FetchContent_MakeAvailable(saucer)
-
+# Compile the main executable
 add_executable(clang-build-profiler)
 
 target_include_directories(
@@ -45,3 +38,21 @@ target_sources(
 target_compile_features(clang-build-profiler PRIVATE ${CR_COMPILE_FEATURES})
 target_compile_options (clang-build-profiler PRIVATE ${CR_COMPILER_FLAGS}  )
 target_link_options    (clang-build-profiler PRIVATE ${CR_LINKER_FLAGS}    )
+
+# Embed resources into the executable
+include(cmake/CMakeRC.cmake)
+
+cmrc_add_resource_library(
+    clang-build-profiler-resources
+    NAMESPACE cbp
+    "resources/mkdocs/mkdocs.yml"
+    "resources/mkdocs/docs/admonitions.css"
+    "resources/mkdocs/docs/classes.css"
+    "resources/mkdocs/docs/width.css"
+)
+
+target_compile_features(clang-build-profiler-resources PRIVATE ${CR_COMPILE_FEATURES})
+target_compile_options (clang-build-profiler-resources PRIVATE ${CR_COMPILER_FLAGS}  )
+target_link_options    (clang-build-profiler-resources PRIVATE ${CR_LINKER_FLAGS}    )
+
+target_link_libraries(clang-build-profiler PUBLIC clang-build-profiler-resources)
