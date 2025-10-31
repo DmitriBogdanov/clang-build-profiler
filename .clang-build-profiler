@@ -5,10 +5,10 @@ version: "0.1.0"
 tree:
   # How to color the tree nodes
   categorize:
-    gray  :   0 # duration >  50 ms => color gray
-    white : 100 # duration > 100 ms => color white
-    yellow: 150 # duration > 150 ms => color yellow
-    red   : 300 # duration > 300 ms => color red
+    gray  :  30 # duration >  50 ms => color gray
+    white : 150 # duration > 100 ms => color white
+    yellow: 300 # duration > 150 ms => color yellow
+    red   : 800 # duration > 300 ms => color red
     
     # Note: nodes without a color are hidden, to disable all pruning set 'gray' to '0'
   

@@ -27,4 +27,8 @@ void replace_all_template(std::string& str, const std::regex& from, std::string_
 
 void replace_all_template(std::string& str, std::string_view from, std::string_view to);
 
+void replace_prefix(std::string& str, std::string_view from, std::string_view to);
+
+void replace_suffix(std::string& str, std::string_view from, std::string_view to);
+
 } // namespace cbp

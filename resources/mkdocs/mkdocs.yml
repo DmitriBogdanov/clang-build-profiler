@@ -1,0 +1,79 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a MkDocs Material config for automatically deployed GitHub Pages,
+#    see https://squidfunk.github.io/mkdocs-material/
+# _______________________________________________________________________________
+
+# ============
+# --- Core ---
+# ============
+
+site_name: "clang-build-profiler"
+
+site_url: https://dmitribogdanov.github.io/clang-build-profiler/
+
+repo_url: https://github.com/DmitriBogdanov/clang-build-profiler
+
+repo_name: GitHub/clang-build-profiler
+
+# ===========================
+# --- Markdown extensions ---
+# ===========================
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details     # enables expandable admonitions
+  - toc:                 # enables permalink buttons next to the section headings
+      permalink: true    #
+
+# =========================
+# --- Style & structure ---
+# =========================
+
+plugins:
+  - offline     # enables HTML with relative paths
+  - search      # enables search function
+
+theme:
+  name: material
+  
+  favicon: images/icon_site_logo.ico
+  
+  icon:
+    logo: material/tools
+    repo: fontawesome/brands/github
+  
+  # Color palette with a light/dark mode toggle
+  palette:
+    # Dark mode (default)
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch-off
+        name: Switch to light mode
+      primary: black
+      accent: light blue
+    # Light mode
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+      primary: deep purple
+      accent: purple
+  
+  features:
+    - toc.follow        # makes the sidebar automatically scroll to keep current TOC heading visible
+    - search.suggest    # adds greyed-out suggestion to the search
+    - content.tooltips  # improves the style of hover tooltips (library name, permalink button, mode switch, repo link)
+
+# Footer configuration
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/DmitriBogdanov
+
+copyright: "Copyright &copy; 2025 Dmitri Bogdanov"
+
+extra_css:
+  - admonitions.css # custom admonition types
+  - width.css       # makes page content wide on large screens
+  - classes.css     # custom formatting classes

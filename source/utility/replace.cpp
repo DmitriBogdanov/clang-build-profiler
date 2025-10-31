@@ -66,3 +66,11 @@ void cbp::replace_all_template(std::string& str, std::string_view from, std::str
         i += to.size(); // step over the replaced region
     }
 }
+
+void cbp::replace_prefix(std::string& str, std::string_view from, std::string_view to) {
+    if (str.starts_with(from)) str.replace(0, from.size(), to);
+}
+
+void cbp::replace_suffix(std::string& str, std::string_view from, std::string_view to) {
+    if (str.ends_with(from)) str.replace(str.size() - from.size(), from.size(), to);
+}

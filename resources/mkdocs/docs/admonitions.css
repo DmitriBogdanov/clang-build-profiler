@@ -1,0 +1,128 @@
+/*
+__________________________________ CONTENTS ___________________________________
+
+   This is a style sheet for a "custom" admonitions which we use as collapsible
+   blocks for various node types.
+   
+   See: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#custom-admonitions
+_______________________________________________________________________________
+*/
+
+/* Color pallette for custom admonition types */
+
+:root {
+    --cbp-foreground-failure: #ff5252;
+    --cbp-background-failure: #ff52521a;
+    
+    --cbp-foreground-info: #00b8d4;
+    --cbp-background-info: #00b8d41a;
+    
+    --cbp-foreground-important: #b76bc7;
+    --cbp-background-important: rgba(183, 107, 199, 0.1);
+    
+    --cbp-foreground-note: #448aff;
+    --cbp-background-note: #448aff1a;
+    
+    --cbp-foreground-quote: #9e9e9e;
+    --cbp-background-quote: #9e9e9e1a;
+    
+    --cbp--admonition-reddish: #ff5252;
+    --cbp--admonition-purple: #b76bc7;
+    --cbp--admonition-sky: #00b8d4;
+    --cbp--admonition-blue: #448aff;
+    
+    --cbp--admonition-red: #ff1744;
+    --cbp--admonition-yellow: #ff9100;
+    --cbp--admonition-white: #9e9e9e;
+    --cbp--admonition-gray: #1e2129;
+}
+
+/* Makes admonitions use a minimalistic legacy style with colored border only on the left side */
+.md-typeset .admonition, .md-typeset details {
+  border-width: 0;
+  border-left-width: 4px;
+}
+
+/* Moves the admonition title left to account for the missing icon */
+[dir="ltr"] .md-typeset .admonition-title, [dir="ltr"] .md-typeset summary {
+    padding-left: 0.4rem;
+}
+
+/* Removed padding, making admonitions significantly tighter */
+.md-typeset .admonition-title, .md-typeset summary {
+    padding-top: 0.0rem;
+    padding-bottom: 0.0rem;
+}
+
+/* Moves the icon up since we no longer have any padding */
+.md-typeset .admonition-title::before, .md-typeset summary::before {
+    top: 0rem;         /* controls vertical  position of the icon  */
+    margin-left: 0rem; /* controls horizontal position of the icon */
+    display: none;     /* disables the icon display                */
+}
+/* Moves the expand button up since we no longer have any padding */
+.md-typeset .admonition-title::after, .md-typeset summary::after {
+    top: 0rem;
+}
+
+
+
+/* Targets */
+
+.md-typeset .admonition.targets, .md-typeset details.targets {
+    border-color: var(--cbp-foreground-failure);
+}
+.md-typeset .targets > .admonition-title, .md-typeset .targets > summary {
+    background-color: var(--cbp-background-failure);
+}
+.md-typeset .targets > .admonition-title::before, .md-typeset .targets > summary::before {
+    background-color: var(--cbp-foreground-failure);
+}
+
+/* Target */
+
+.md-typeset .admonition.target, .md-typeset details.target {
+    border-color: var(--cbp-foreground-important);
+}
+.md-typeset .target > .admonition-title, .md-typeset .target > summary {
+    background-color: var(--cbp-background-important);
+}
+.md-typeset .target > .admonition-title::before, .md-typeset .target > summary::before {
+    background-color: var(--cbp-foreground-important);
+}
+
+/* Translation unit */
+
+.md-typeset .admonition.translation-unit , .md-typeset details.translation-unit  {
+    border-color: var(--cbp-foreground-info);
+}
+.md-typeset .translation-unit  > .admonition-title, .md-typeset .translation-unit  > summary {
+    background-color: var(--cbp-background-info);
+}
+.md-typeset .translation-unit  > .admonition-title::before, .md-typeset .translation-unit  > summary::before {
+    background-color: var(--cbp-foreground-info);
+}
+
+/* Compilation stage */
+
+.md-typeset .admonition.compilation-stage, .md-typeset details.compilation-stage {
+    border-color: var(--cbp-foreground-note);
+}
+.md-typeset .compilation-stage > .admonition-title, .md-typeset .compilation-stage > summary {
+    background-color: var(--cbp-background-note);
+}
+.md-typeset .compilation-stage > .admonition-title::before, .md-typeset .compilation-stage > summary::before {
+    background-color: var(--cbp-foreground-note);
+}
+
+/* Node */
+
+.md-typeset .admonition.node, .md-typeset details.node {
+    border-color: var(--cbp-foreground-quote);
+}
+.md-typeset .node > .admonition-title, .md-typeset .node > summary {
+    background-color: var(--cbp-background-quote);
+}
+.md-typeset .node > .admonition-title::before, .md-typeset .node > summary::before {
+    background-color: var(--cbp-foreground-quote);
+}

@@ -70,6 +70,10 @@ enum class tree_type : std::uint16_t {
     return static_cast<tree_type>(std::to_underlying(a) | std::to_underlying(b));
 }
 
+[[nodiscard]] constexpr bool to_bool(tree_type value) noexcept {
+    return static_cast<bool>(value);
+}
+
 // Node categorization used for coloring and pruning, warmer colors correspond to nodes that took more time
 enum class tree_category : std::uint8_t { none, gray, white, yellow, red };
 

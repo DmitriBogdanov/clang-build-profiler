@@ -1,0 +1,29 @@
+/* Custom class for coloring timing differently */
+
+:root {
+    --cbp--admonition-reddish: #ff5252;
+    --cbp--admonition-purple: #b76bc7;
+    --cbp--admonition-sky: #00b8d4;
+    --cbp--admonition-blue: #448aff;
+    
+    --cbp-code-blue: #658edb;
+    --cbp-code-purple: #c973d9;
+    
+    --cbp-admonition-orange: #ff9100;
+}
+
+.cbp-timing {
+    color: var(--md-typeset-a-color); /* main theme color, adjusts with the light/dark mode */
+}
+.cbp-timing-red {
+    color: #ff5252; /* main theme color, adjusts with the light/dark mode */
+}
+.cbp-timing-yellow {
+    color: #ff9100;
+}
+.cbp-timing-white {
+    color: var(--md-default-fg-color); /* adjusts with the light/dark mode */
+}
+.cbp-timing-gray {
+    color: var(--md-default-fg-color--light); /* adjusts with the light/dark mode */
+}

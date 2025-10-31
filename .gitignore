@@ -40,3 +40,6 @@
 !include/**
 !source/
 !source/**
+# > Resources
+!resources/
+!resources/**

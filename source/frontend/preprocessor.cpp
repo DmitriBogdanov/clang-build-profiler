@@ -11,6 +11,7 @@
 
 #include "utility/filepath.hpp"
 #include "utility/prettify.hpp"
+#include "utility/replace.hpp"
 
 cbp::tree_category category_from_time(cbp::microseconds total, const cbp::config& config) {
     return (total >= config.tree.categorize.red)      ? cbp::tree_category::red
@@ -47,12 +48,34 @@ void prettify_instantiations(std::vector<cbp::tree>& children) {
     }
 }
 
+void replace_configured_prefixes(std::vector<cbp::tree>& children, const cbp::config& config) {
+    for (auto& child : children)
+        if (child.type == cbp::tree_type::parse || child.type == cbp::tree_type::translation_unit)
+            for (const auto& replacement : config.tree.replace_prefix)
+                cbp::replace_prefix(child.name, replacement.from, replacement.to);
+}
+
+
 void prettify_tree(cbp::tree& tree, const cbp::config& config) {
     categorize(tree.children, config); // should happen first
     prune(tree.children);              // uses categorization for pruning
 
+    // Simplify target & translation unit names
+    if (tree.type == cbp::tree_type::target) {
+        const std::string target_path = tree.name;
+
+        tree.name = cbp::trim_filepath(target_path); // CMake guarantees unique target names,
+        cbp::replace_suffix(tree.name, ".dir", "");  // specifying the full directory is redundant
+
+        for (auto& translation_unit : tree.children) {
+            cbp::replace_prefix(translation_unit.name, target_path + "/", ""); // trims target root
+            cbp::replace_suffix(translation_unit.name, ".json", "");           // trims trace extension suffix
+        }
+    }
+
     normalize_paths(tree.children);
     prettify_instantiations(tree.children);
+    replace_configured_prefixes(tree.children, config);
 
     for (auto& child : tree.children) prettify_tree(child, config);
 }

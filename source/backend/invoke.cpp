@@ -94,8 +94,9 @@ cbp::tree cbp::analyze_build(std::string_view path) try {
 
     std::string line;
     while (std::getline(target_directories_file, line)) {
-        if (line.ends_with("edit_cache.dir") || line.ends_with("rebuild_cache.dir")) continue;
-        target_directories.push_back(std::move(line));
+        // Targets with no corresponding directories are internal CMake targets, ignore them
+        if (std::filesystem::exists(line) && !std::filesystem::is_empty(line))
+            target_directories.push_back(std::move(line));
     }
 
     // Create root node
