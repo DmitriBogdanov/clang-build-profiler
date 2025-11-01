@@ -81,8 +81,9 @@ struct tree {
     cbp::tree_type     type;
     cbp::tree_category category = cbp::tree_category::none;
     std::string        name     = {};
-    cbp::microseconds  total    = {};
-    cbp::microseconds  self     = {};
+    cbp::microseconds  total    = {}; // total duration of the node
+    cbp::microseconds  self     = {}; // self- duration of the node
+    cbp::microseconds  carry    = {}; // duration which needs to be recursively carried upwards
     std::vector<tree>  children = {};
 
     auto operator<=>(const tree& other) const {

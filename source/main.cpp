@@ -14,7 +14,6 @@
 
 #include "backend/config.hpp"
 #include "backend/invoke.hpp"
-#include "backend/profile.hpp"
 #include "frontend/json.hpp"
 #include "frontend/mkdocs.hpp"
 #include "frontend/preprocessor.hpp"

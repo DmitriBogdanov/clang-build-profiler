@@ -1,17 +1,12 @@
 > [!Warning]
 > This project is under development. Current documentations acts more like a rough specification of intended features, rather than an accurate representation of the software. Nonetheless, the core functionality is mostly completed.
 
-Language: C++23
-License: MIT
-Semver: 2.0.0
-Docs: MkDocs
-CLI Tool
-Pre-build binaries
-
-Windows: passing
-Ubuntu: passing
-MacOS: passing
-FreeBSD: passing
+[<img src ="images/badge_language_cpp_23.svg">](https://en.cppreference.com/w/cpp/23.html)
+[<img src ="images/badge_license_mit.svg">](LICENSE.md)
+[<img src ="images/badge_semver.svg">](https://semver.org/)
+[<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/clang-build-profiler/)
+<img src ="images/badge_cli_tool.svg">
+[<img src ="images/badge_pre_built_binaries.svg">](https://github.com/DmitriBogdanov/clang-build-profiler/releases)
 
 # clang-build-profiler
 
@@ -25,14 +20,17 @@ FreeBSD: passing
 
 ```sh
 clang-build-profiler --build=build/ --output=mkdocs
+```
+
+3. Open the generated report:
+
+```sh
 (cd .cbp && mkdocs serve --open)
 ```
 
-3. Enjoy the report:
-
 <img src="images/showcase_mkdocs.png">
 
-4. Other profiling formats include:
+4. Available output formats include:
 
 | Type                | Description                                                  | Requirements                  |
 | ------------------- | ------------------------------------------------------------ | ----------------------------- |
@@ -44,7 +42,7 @@ clang-build-profiler --build=build/ --output=mkdocs
 ## Features
 
 - Builds a tree of includes and their parse timings
-- Builds a list of template instantiations and their timings
+- Builds a tree of template instantiations and their timings
 - Summarizes the information above into a digestible format
 - Prettifies standard templates and their expansion (e.g. no `std::basic_string<char, ...>`)
 - Automatically analyzes CMake builds with multiple targets
@@ -76,13 +74,13 @@ In many cases, build times can be noticeably improved through a relatively minor
 
 The source code of this project embeds several dependencies:
 
-| Library                                         | Version      | License                                                      | Used for                      |
-| ----------------------------------------------- | ------------ | ------------------------------------------------------------ | ----------------------------- |
-| [UTL](https://github.com/DmitriBogdanov/UTL)    | **v8.3.3**   | [MIT](https://github.com/DmitriBogdanov/UTL/blob/master/docs/LICENSE.md) | Formatting                    |
-| [glaze](https://github.com/stephenberry/glaze)  | **v6.0.0**   | [MIT](https://github.com/stephenberry/glaze/blob/main/LICENSE) | High-performance JSON parsing |
-| [argparse](https://github.com/p-ranav/argparse) | **v3.2**     | [MIT](https://github.com/p-ranav/argparse/blob/master/LICENSE) | CLI argument parsing          |
-| [fkYAML](https://github.com/fktn-k/fkYAML)      | **0.4.2**    | [MIT](https://github.com/fktn-k/fkYAML/blob/main/LICENSE.txt) | YAML parsing                  |
-| [cmrc](https://github.com/vector-of-bool/cmrc)  | **#952ffdd** | [MIT](https://github.com/vector-of-bool/cmrc/blob/master/LICENSE.txt) | Embedding resources           |
+| Library                                         | Version      | License                                                      | Used for                     |
+| ----------------------------------------------- | ------------ | ------------------------------------------------------------ | ---------------------------- |
+| [UTL](https://github.com/DmitriBogdanov/UTL)    | **v8.3.3**   | [MIT](https://github.com/DmitriBogdanov/UTL/blob/master/docs/LICENSE.md) | Formatting                   |
+| [glaze](https://github.com/stephenberry/glaze)  | **v6.0.0**   | [MIT](https://github.com/stephenberry/glaze/blob/main/LICENSE) | JSON parsing & serialization |
+| [argparse](https://github.com/p-ranav/argparse) | **v3.2**     | [MIT](https://github.com/p-ranav/argparse/blob/master/LICENSE) | CLI argument parsing         |
+| [fkYAML](https://github.com/fktn-k/fkYAML)      | **0.4.2**    | [MIT](https://github.com/fktn-k/fkYAML/blob/main/LICENSE.txt) | YAML parsing                 |
+| [cmrc](https://github.com/vector-of-bool/cmrc)  | **#952ffdd** | [MIT](https://github.com/vector-of-bool/cmrc/blob/master/LICENSE.txt) | Embedding resources          |
 
 ## Roadmap
 
