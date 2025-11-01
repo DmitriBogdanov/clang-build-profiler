@@ -11,19 +11,18 @@
 
 #pragma once
 
-#include <regex>
 #include <string>
+
+#include "external/boost/regex.hpp"
 
 
 namespace cbp {
 
 void replace_all(std::string& str, std::string_view from, std::string_view to);
 
-void replace_all(std::string& str, const std::regex& from, std::string_view to);
+void replace_all(std::string& str, const boost::regex& from, std::string_view to);
 
 void replace_all_dynamically(std::string& str, std::string_view from, std::string_view to);
-
-void replace_all_template(std::string& str, const std::regex& from, std::string_view to);
 
 void replace_all_template(std::string& str, std::string_view from, std::string_view to);
 

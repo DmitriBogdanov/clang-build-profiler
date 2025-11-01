@@ -19,8 +19,8 @@ void cbp::replace_all(std::string& str, std::string_view from, std::string_view 
     }
 }
 
-void cbp::replace_all(std::string& str, const std::regex& from, std::string_view to) {
-    str = std::regex_replace(str, from, std::string(to));
+void cbp::replace_all(std::string& str, const boost::regex& from, std::string_view to) {
+    str = boost::regex_replace(str, from, std::string(to));
 }
 
 void cbp::replace_all_dynamically(std::string& str, std::string_view from, std::string_view to) {

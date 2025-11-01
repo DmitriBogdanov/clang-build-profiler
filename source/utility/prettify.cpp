@@ -41,7 +41,7 @@ void normalize_comma_spacing(std::string& identifier) {
 
 void normalize_classes(std::string& identifier) {
     // Normalize "class whatever" -> "whatever"
-    cbp::replace_all(identifier, std::regex{R"(\b(class|struct)\s+)"}, "");
+    cbp::replace_all(identifier, boost::regex{R"(\b(class|struct)\s+)"}, "");
     // normalizes MSVC relative to the other compilers
 }
 
@@ -66,13 +66,13 @@ std::string cbp::prettify::normalize(std::string identifier) {
 
 void deobfuscate_std_namespace(std::string& identifier) {
     // Replace "std::_something::" -> "std::"
-    cbp::replace_all(identifier, std::regex{R"(std(::_[a-zA-Z0-9_]+)?::)"}, "std::");
+    cbp::replace_all(identifier, boost::regex{R"(std(::_[a-zA-Z0-9_]+)?::)"}, "std::");
     // usually this removes stuff like "std::__1::", "std::__cxx11::" and etc.
 }
 
 void deobfuscate_abi_suffixes(std::string& identifier) {
     // Remove ABI suffixes like "[abi:ne210103]"
-    cbp::replace_all(identifier, std::regex{R"(\[abi:[a-zA-Z0-9]+\])"}, "");
+    cbp::replace_all(identifier, boost::regex{R"(\[abi:[a-zA-Z0-9]+\])"}, "");
 }
 
 std::string cbp::prettify::deobfuscate(std::string identifier) {
@@ -109,8 +109,8 @@ void collapse_string(std::string& identifier) {
 }
 
 void collapse_regex(std::string& identifier) {
-    // Replace "std::basic_regex<char_type>" -> "std::regex_type"
-    cbp::replace_all(identifier, "std::basic_regex<char>", "std::regex");
+    // Replace "std::basic_regex<char_type>" -> "boost::regex_type"
+    cbp::replace_all(identifier, "std::basic_regex<char>", "boost::regex");
     cbp::replace_all(identifier, "std::basic_regex<wchar_t>", "std::wregex");
 }
 

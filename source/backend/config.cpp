@@ -8,9 +8,9 @@
 #include "backend/config.hpp"
 
 #include <fstream>
-#include <regex>
 
 #include "external/fkYAML/node.hpp"
+#include "external/boost/regex.hpp"
 
 #include "utility/colors.hpp"
 #include "utility/exception.hpp"
@@ -73,7 +73,7 @@ cbp::config cbp::config::from_file(std::string_view path) {
 std::optional<std::string> cbp::config::validate() const {
 
     // Validate version
-    if (!std::regex_match(this->version, std::regex{R"(^\d*\.\d*\.\d*)"})) {
+    if (!boost::regex_match(this->version, boost::regex{R"(^\d*\.\d*\.\d*)"})) {
         constexpr auto fmt = "'version' has a value {{ {} }}, which doesn't the schema <major>.<minor>.<patch>";
         return std::format(fmt, this->version);
     }

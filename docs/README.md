@@ -32,19 +32,19 @@ clang-build-profiler --build=build/ --output=mkdocs
 
 4. Available output formats include:
 
-| Type                | Description                                                  | Requirements                  |
-| ------------------- | ------------------------------------------------------------ | ----------------------------- |
-| `--output=mkdocs`   | Nicest output for viewing, it uses [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) to serve an interactive GUI in browser | `pip install mkdocs-material` |
-| `--output=terminal` | Colored in-terminal output, useful for small projects or with high level of pruning | None                          |
-| `--output=json`     | JSON dump of profiling data, useful for custom analysis pipelines | None                          |
-| `--output=text`     | Text file output, useful for saving human-readable build artifacts with profiling data | None                          |
+| `--output` | Description                                                  | Requirements                  |
+| ---------- | ------------------------------------------------------------ | ----------------------------- |
+| `mkdocs`   | Nicest output for viewing, it uses [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) to serve an interactive GUI in browser | `pip install mkdocs-material` |
+| `terminal` | Colored in-terminal output, useful for small projects or with high level of pruning | None                          |
+| `json`     | JSON dump of profiling data, useful for custom analysis pipelines | None                          |
+| `text`     | Text file output, useful for saving human-readable build artifacts with profiling data | None                          |
 
 ## Features
 
 - Builds a tree of includes and their parse timings
 - Builds a tree of template instantiations and their timings
 - Summarizes the information above into a digestible format
-- Prettifies standard templates and their expansion (e.g. no `std::basic_string<char, ...>`)
+- Prettifies standard templates and their expansion (e.g. `std::basic_string<char, ...>` ↦ `std::string`)
 - Automatically analyzes CMake builds with multiple targets
 
 ## Documentation
@@ -79,7 +79,8 @@ The source code of this project embeds several dependencies:
 | [UTL](https://github.com/DmitriBogdanov/UTL)    | **v8.3.3**   | [MIT](https://github.com/DmitriBogdanov/UTL/blob/master/docs/LICENSE.md) | Formatting                   |
 | [glaze](https://github.com/stephenberry/glaze)  | **v6.0.0**   | [MIT](https://github.com/stephenberry/glaze/blob/main/LICENSE) | JSON parsing & serialization |
 | [argparse](https://github.com/p-ranav/argparse) | **v3.2**     | [MIT](https://github.com/p-ranav/argparse/blob/master/LICENSE) | CLI argument parsing         |
-| [fkYAML](https://github.com/fktn-k/fkYAML)      | **0.4.2**    | [MIT](https://github.com/fktn-k/fkYAML/blob/main/LICENSE.txt) | YAML parsing                 |
+| [fkYAML](https://github.com/fktn-k/fkYAML)      | **v0.4.2**   | [MIT](https://github.com/fktn-k/fkYAML/blob/main/LICENSE.txt) | YAML parsing                 |
+| [Boost.Regex](https://www.boost.org/libs/regex) | **v7.0.1**   | [Boost](https://www.boost.org/LICENSE_1_0.txt)               | Regular expressions          |
 | [cmrc](https://github.com/vector-of-bool/cmrc)  | **#952ffdd** | [MIT](https://github.com/vector-of-bool/cmrc/blob/master/LICENSE.txt) | Embedding resources          |
 
 ## Roadmap
