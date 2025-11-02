@@ -59,7 +59,7 @@ The docs can also be viewed directly from GitHub:
 - [Profiling a CMake build]()
 - [Profiling a Visual Studio build]()
 - [Profiling an individual translation unit]()
-- [Building the project locally]()
+- [Building the project locally](building_locally.md)
 - [Technical limitations]()
 
 A shorter built-in documentation can be accessed with `clang-build-profiler --help`.
