@@ -21,9 +21,7 @@
             "name": "clang",
             "description": "Clang configuration variables.",
             "inherits": [ "base" ],
-            "generator": "Ninja",
             "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
                 "CBP_COMPILER_FLAGS": "-stdlib=libc++;-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;-ftime-trace",
                 "CBP_LINKER_FLAGS": "-stdlib=libc++;-fsanitize=address,undefined"
@@ -33,12 +31,19 @@
             "name": "clang-release",
             "description": "Clang configuration variables for Release.",
             "inherits": [ "base" ],
-            "generator": "Ninja",
             "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
                 "CBP_COMPILER_FLAGS": "-stdlib=libc++;-O3;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-ftime-trace",
                 "CBP_LINKER_FLAGS": "-stdlib=libc++"
+            }
+        },
+        {
+            "name": "msvc-release",
+            "description": "MSVC configuration variables for Release.",
+            "inherits": [ "base" ],
+            "cacheVariables": {
+                "CBP_COMPILER_FLAGS": "/O2;/W3;/permissive-;/Zc:preprocessor",
+                "CBP_LINKER_FLAGS": ""
             }
         }
     ],
@@ -51,7 +56,8 @@
             "jobs": 4
         },
         { "name": "clang"        , "configurePreset": "clang"        , "inherits": [ "base" ] },
-        { "name": "clang-release", "configurePreset": "clang-release", "inherits": [ "base" ] }
+        { "name": "clang-release", "configurePreset": "clang-release", "inherits": [ "base" ] },
+        { "name": "msvc-release" , "configurePreset": "msvc-release" , "inherits": [ "base" ] }
     ],
     
     "testPresets": [
@@ -67,6 +73,7 @@
             }
         },
         { "name": "clang"        , "configurePreset": "clang"        , "inherits": [ "base" ] },
-        { "name": "clang-release", "configurePreset": "clang-release", "inherits": [ "base" ] }
+        { "name": "clang-release", "configurePreset": "clang-release", "inherits": [ "base" ] },
+        { "name": "msvc-release" , "configurePreset": "msvc-release" , "inherits": [ "base" ] }
     ]
 }
