@@ -53,7 +53,7 @@ The [project website]() serves as its main form of documentation.
 
 The docs can also be viewed directly from GitHub:
 
-- [Getting started]()
+- [Getting started](getting_started.md)
 - [Configuration file]()
 - [Supported CLI flags]()
 - [Profiling a CMake build]()

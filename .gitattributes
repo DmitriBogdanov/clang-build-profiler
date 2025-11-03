@@ -1,0 +1,8 @@
+# Exclude dependencies from GitHub 'Languages' repository statistic
+include/external/** linguist-vendored
+source/external/** linguist-vendored
+cmake/** linguist-vendored
+
+# Source diff format
+*.cpp   text diff=cpp
+*.hpp   text diff=cpp
