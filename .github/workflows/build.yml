@@ -21,8 +21,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     steps:
-      - name: "Setup Clang"
-        uses: egor-tensin/setup-clang@v1
+      # - name: "Setup Clang"
+      #  uses: egor-tensin/setup-clang@v1
+    
+      - name: "Setup LLVM"
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "21"
       
       - name: "Checkout repository"
         uses: actions/checkout@v4
