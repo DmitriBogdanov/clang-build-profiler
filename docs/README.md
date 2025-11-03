@@ -5,8 +5,11 @@
 [<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](https://semver.org/)
 [<img src ="images/badge_docs.svg">](https://dmitribogdanov.github.io/clang-build-profiler/)
-<img src ="images/badge_cli_tool.svg">
 [<img src ="images/badge_pre_built_binaries.svg">](https://github.com/DmitriBogdanov/clang-build-profiler/releases)
+
+[<img src ="images/badge_workflow_windows.svg">](https://github.com/DmitriBogdanov/clang-build-profiler/actions/workflows/windows.yml)
+[<img src ="images/badge_workflow_ubuntu.svg">](https://github.com/DmitriBogdanov/clang-build-profiler/actions/workflows/ubuntu.yml)
+[<img src ="images/badge_workflow_macos.svg">](https://github.com/DmitriBogdanov/clang-build-profiler/actions/workflows/macos.yml)
 
 # clang-build-profiler
 

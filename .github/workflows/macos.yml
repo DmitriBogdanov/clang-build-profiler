@@ -1,0 +1,41 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a workflow file for GitHub Actions that
+#    builds distributable binaries for MacOS x86-64.
+# _______________________________________________________________________________
+
+name: "Build: MacOS x86-64"
+
+run-name: "Release build for MacOS x86-64"
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+      
+      - name: Setup LLVM toolchain
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: llvm
+          cmake: true
+          ninja: true
+      
+      - name: "Configure CMake"
+        run: cmake --preset=clang-release
+      
+      - name: "Build the project"
+        run: cmake --build --preset=clang-release
+      
+      - name: "Upload test artifacts"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: "artifacts-macos-x86_64"
+          path: |
+            build/
+            !build/CMakeFiles/clang-build-profiler.dir
