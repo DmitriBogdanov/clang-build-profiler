@@ -17,24 +17,48 @@ jobs:
       matrix:
         include:
           # Ubuntu x86-64
-          - os      : ubuntu-latest
+          - target  : ubuntu
+            arch    : x86_64
+            runner  : ubuntu-latest
             compiler: llvm
             preset  : clang-release
             config  : Release
-            arch    : x64
+          # MacOS x86-64
+          - target  : macos
+            arch    : x86_64
+            runner  : macos-latest
+            compiler: llvm
+            preset  : clang-release
+            config  : Release
+          # FreeBSD x86-64
+          # - target  : freebsd
+          #   arch    : x86_64
+          #   runner  : ubuntu-latest
+          #   compiler: llvm
+          #   preset  : clang-release
+          #   config  : Release
           # Windows x86-64
-          - os      : windows-latest
+          - target  : windows
+            arch    : x86_64
+            runner  : windows-latest
             compiler: msvc
             preset  : msvc-release
             config  : Release
-            arch    : x64
     
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
     
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
-        
+      
+      # - name: "Set up FreeBSD VM"
+      #   uses: vmactions/freebsd-vm@v1
+      #   if: ${{ matrix.target == 'freebsd' }}
+      #   with:
+      #     release: '14.2' # release from 2024.12.03
+      #     usesh: true     # otherwise FreeBSD uses 'tcsh' shell
+      #     prepare: pkg install -y cmake
+      
       - name: Setup LLVM toolchain
         uses: aminya/setup-cpp@v1
         if: ${{ matrix.compiler == 'llvm' }}
@@ -47,13 +71,13 @@ jobs:
         run: cmake --preset=${{ matrix.preset }}
       
       - name: "Build the project"
-        run: cmake --build --preset=clang-release --config ${{ matrix.configuration }}
+        run: cmake --build --preset=${{ matrix.preset }} --config ${{ matrix.configuration }}
       
       - name: "Upload test artifacts"
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: "artifact-${{matrix.os}}-${{matrix.arch}}"
+          name: "artifacts-${{matrix.target}}-${{matrix.arch}}"
           path: |
             build/
             !build/CMakeFiles/clang-build-profiler.dir
