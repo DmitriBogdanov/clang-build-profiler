@@ -21,6 +21,7 @@
             "name": "clang",
             "description": "Clang configuration variables.",
             "inherits": [ "base" ],
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
@@ -32,6 +33,7 @@
             "name": "clang-release",
             "description": "Clang configuration variables for Release.",
             "inherits": [ "base" ],
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",

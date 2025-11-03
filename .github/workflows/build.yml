@@ -31,17 +31,14 @@ jobs:
         uses: aminya/setup-cpp@v1
         with:
           compiler: llvm
-          vcvarsall: true
           cmake: true
           ninja: true
         
-      # - name: "Setup Clang"
-      #  uses: egor-tensin/setup-clang@v1
-    
-      # - name: "Setup LLVM"
-      #   uses: KyleMayes/install-llvm-action@v2
-      #   with:
-      #     version: "21"
+      - name: Check toolchain version
+        run: |
+          cmake --version
+          clang --version
+          clang++ --version
       
       - name: "Configure CMake"
         run: cmake --preset=clang-release
