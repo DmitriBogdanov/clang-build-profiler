@@ -54,13 +54,13 @@ The [project website]() serves as its main form of documentation.
 The docs can also be viewed directly from GitHub:
 
 - [Getting started](getting_started.md)
-- [Configuration file]()
-- [Supported CLI flags]()
+- [Configuration file](configuration_file.md)
+- [Supported CLI flags](cli_arguments.md)
 - [Profiling a CMake build]()
 - [Profiling a Visual Studio build]()
 - [Profiling an individual translation unit]()
 - [Building the project locally](building_locally.md)
-- [Technical limitations]()
+- [Technical limitations](technical_limitations.md)
 
 A shorter built-in documentation can be accessed with `clang-build-profiler --help`.
 
