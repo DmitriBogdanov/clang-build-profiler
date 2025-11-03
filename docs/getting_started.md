@@ -53,10 +53,7 @@ Analyzing a large build directly in the terminal is rather impractical. Using `m
 `mkdocs` can be easily installed with `pip`:
 
 ```sh
-pip install mkdocs-material          &&
-pip install mkdocs-material[imaging] &&
-pip install markdown-callouts        &&
-pip install mkdocs-awesome-nav
+pip install mkdocs-material
 ```
 
 After this we can analyze the build:

@@ -52,17 +52,13 @@ This repo uses [MkDocs](https://www.mkdocs.org/) with [Material](https://squidfu
 `python3` can be downloaded from the [official website](https://www.python.org/downloads/) or using a package manager:
 
 ```sh
-sudo apt update &&
-sudo apt install python3
+sudo apt update && sudo apt install python3
 ```
 
 After this, to install necessary dependencies run:
 
 ```sh
-pip install mkdocs-material          &&
-pip install mkdocs-material[imaging] &&
-pip install markdown-callouts        &&
-pip install mkdocs-awesome-nav
+pip install mkdocs-material mkdocs-material[imaging] markdown-callouts mkdocs-awesome-nav
 ```
 
 ### Building
