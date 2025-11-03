@@ -35,9 +35,9 @@ target_sources(
     "source/utility/version.cpp"
 )
 
-target_compile_features(clang-build-profiler PRIVATE ${CR_COMPILE_FEATURES})
-target_compile_options (clang-build-profiler PRIVATE ${CR_COMPILER_FLAGS}  )
-target_link_options    (clang-build-profiler PRIVATE ${CR_LINKER_FLAGS}    )
+target_compile_features(clang-build-profiler PRIVATE ${CBP_COMPILE_FEATURES})
+target_compile_options (clang-build-profiler PRIVATE ${CBP_COMPILER_FLAGS}  )
+target_link_options    (clang-build-profiler PRIVATE ${CBP_LINKER_FLAGS}    )
 
 # Embed resources into the executable
 include(cmake/CMakeRC.cmake)
@@ -51,8 +51,8 @@ cmrc_add_resource_library(
     "resources/mkdocs/docs/width.css"
 )
 
-target_compile_features(clang-build-profiler-resources PRIVATE ${CR_COMPILE_FEATURES})
-target_compile_options (clang-build-profiler-resources PRIVATE ${CR_COMPILER_FLAGS}  )
-target_link_options    (clang-build-profiler-resources PRIVATE ${CR_LINKER_FLAGS}    )
+target_compile_features(clang-build-profiler-resources PRIVATE ${CBP_COMPILE_FEATURES})
+target_compile_options (clang-build-profiler-resources PRIVATE ${CBP_COMPILER_FLAGS}  )
+target_link_options    (clang-build-profiler-resources PRIVATE ${CBP_LINKER_FLAGS}    )
 
 target_link_libraries(clang-build-profiler PUBLIC clang-build-profiler-resources)

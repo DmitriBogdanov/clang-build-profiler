@@ -14,7 +14,7 @@
             "hidden": true,
             "binaryDir": "build/",
             "cacheVariables": {
-                "CR_COMPILE_FEATURES": "cxx_std_23"
+                "CBP_COMPILE_FEATURES": "cxx_std_23"
             }
         },
         {
@@ -22,9 +22,10 @@
             "description": "Clang configuration variables.",
             "inherits": [ "base" ],
             "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
-                "CR_COMPILER_FLAGS": "-stdlib=libc++;-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;-ftime-trace",
-                "CR_LINKER_FLAGS": "-stdlib=libc++;-fsanitize=address,undefined"
+                "CBP_COMPILER_FLAGS": "-stdlib=libc++;-O0;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-fsanitize=address,undefined;-fno-sanitize-recover=all;-ftime-trace",
+                "CBP_LINKER_FLAGS": "-stdlib=libc++;-fsanitize=address,undefined"
             }
         },
         {
@@ -32,9 +33,10 @@
             "description": "Clang configuration variables for Release.",
             "inherits": [ "base" ],
             "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
-                "CR_COMPILER_FLAGS": "-stdlib=libc++;-O3;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-ftime-trace",
-                "CR_LINKER_FLAGS": "-stdlib=libc++"
+                "CBP_COMPILER_FLAGS": "-stdlib=libc++;-O3;-g3;-Wall;-Wextra;-Wpedantic;-Werror;-ftime-trace",
+                "CBP_LINKER_FLAGS": "-stdlib=libc++"
             }
         }
     ],
