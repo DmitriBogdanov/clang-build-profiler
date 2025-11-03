@@ -9,6 +9,8 @@
 // Program entry point. Handles CLI args and invokes the analyzer.
 // _________________________________________________________________________________
 
+#include <print>
+
 #include "external/UTL/time.hpp"
 #include "external/argparse/argparse.hpp"
 

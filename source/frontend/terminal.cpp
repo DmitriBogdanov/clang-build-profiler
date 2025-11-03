@@ -7,6 +7,8 @@
 
 #include "frontend/terminal.hpp"
 
+#include <print>
+
 #include "frontend/formatter.hpp"
 #include "utility/colors.hpp"
 
