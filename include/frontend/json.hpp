@@ -11,11 +11,13 @@
 
 #pragma once
 
+#include <filesystem>
+
 #include "backend/profile.hpp"
 
 
 namespace cbp::output {
     
-void json(const cbp::profile& profile);
+void json(const cbp::profile& profile, const std::filesystem::path& output_directory);
     
 }

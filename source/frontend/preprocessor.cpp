@@ -10,6 +10,7 @@
 #include <filesystem>
 
 #include "utility/filepath.hpp"
+#include "utility/lookup.hpp"
 #include "utility/prettify.hpp"
 #include "utility/replace.hpp"
 
@@ -32,6 +33,30 @@ void prune(std::vector<cbp::tree>& children) {
     children.erase(iter, children.end());
 }
 
+void shorten_standard_headers(std::vector<cbp::tree>& children) {
+    for (auto& child : children) {
+        if (child.type == cbp::tree_type::parse) {
+            const auto filename = cbp::trim_filepath(child.name);
+
+            if (cbp::lookup::is_standard_header(filename)) {
+                child.name = std::format("<{}>", filename);
+                child.self = child.total; // since we remove the info about the children
+                child.children.clear();
+            }
+        }
+    }
+}
+
+void shorten_project_headers(std::vector<cbp::tree>& children, std::string_view working_directory) {
+    for (auto& child : children) {
+        if (child.type == cbp::tree_type::parse || child.type == cbp::tree_type::translation_unit) {
+            cbp::replace_prefix(child.name, working_directory, "");
+            cbp::replace_prefix(child.name, "/", "");
+            cbp::replace_prefix(child.name, "\\", "");
+        }
+    }
+}
+
 void normalize_paths(std::vector<cbp::tree>& children) {
     for (auto& child : children)
         if (child.type == cbp::tree_type::parse || child.type == cbp::tree_type::translation_unit)
@@ -51,12 +76,11 @@ void prettify_instantiations(std::vector<cbp::tree>& children) {
 void replace_configured_prefixes(std::vector<cbp::tree>& children, const cbp::config& config) {
     for (auto& child : children)
         if (child.type == cbp::tree_type::parse || child.type == cbp::tree_type::translation_unit)
-            for (const auto& replacement : config.tree.replace_prefix)
+            for (const auto& replacement : config.tree.replace_filepath)
                 cbp::replace_prefix(child.name, replacement.from, replacement.to);
 }
 
-
-void prettify_tree(cbp::tree& tree, const cbp::config& config) {
+void prettify_tree(cbp::tree& tree, const cbp::config& config, std::string_view working_directory) {
     categorize(tree.children, config); // should happen first
     prune(tree.children);              // uses categorization for pruning
 
@@ -72,21 +96,24 @@ void prettify_tree(cbp::tree& tree, const cbp::config& config) {
             cbp::replace_suffix(translation_unit.name, ".json", "");           // trims trace extension suffix
         }
     }
+    
+    if (config.tree.detect_standard_headers) shorten_standard_headers(tree.children); // uses path & type for pruning
+    if (config.tree.detect_project_headers) shorten_project_headers(tree.children, working_directory);
 
     normalize_paths(tree.children);
     prettify_instantiations(tree.children);
     replace_configured_prefixes(tree.children, config);
 
-    for (auto& child : tree.children) prettify_tree(child, config);
+    for (auto& child : tree.children) prettify_tree(child, config, working_directory);
 }
 
 void prettify_root(cbp::tree& root, const cbp::config& config) {
     root.category = category_from_time(root.total, config);
 }
 
-void cbp::preprocess(cbp::profile& profile) try {
+void cbp::preprocess(cbp::profile& profile, std::string_view working_directory) try {
 
-    prettify_tree(profile.tree, profile.config);
+    prettify_tree(profile.tree, profile.config, working_directory);
     prettify_root(profile.tree, profile.config);
 
 } catch (std::exception& e) { throw cbp::exception{"Could not preprocess profiling tree, error:\n{}", e.what()}; }

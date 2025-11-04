@@ -27,8 +27,8 @@ struct config {
     // ------------------
 
     struct categorization {
-        cbp::milliseconds gray   = cbp::milliseconds{0  };
-        cbp::milliseconds white  = cbp::milliseconds{50 };
+        cbp::milliseconds gray   = cbp::milliseconds{0};
+        cbp::milliseconds white  = cbp::milliseconds{50};
         cbp::milliseconds yellow = cbp::milliseconds{150};
         cbp::milliseconds red    = cbp::milliseconds{300};
     };
@@ -41,7 +41,10 @@ struct config {
     struct tree_section {
         categorization categorize;
 
-        std::vector<prefix_replacement_rule> replace_prefix = {};
+        bool detect_standard_headers = true;
+        bool detect_project_headers  = true;
+
+        std::vector<prefix_replacement_rule> replace_filepath = {};
     };
 
     // --- Members ---

@@ -6,17 +6,14 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// Preprocessing of profiling results: tree pruning, color categorization,
-// path prettification, template prettification and etc. 
+// Lookup sets / tables used for formatting.
 // _________________________________________________________________________________
 
-#pragma once
-
-#include "backend/profile.hpp"
+#include <string_view>
 
 
-namespace cbp {
-
-void preprocess(cbp::profile& profile, std::string_view working_directory);
-
+namespace cbp::lookup {
+    
+bool is_standard_header(std::string_view name);
+    
 }

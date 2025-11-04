@@ -15,26 +15,26 @@
 #include "cmrc/cmrc.hpp"
 CMRC_DECLARE(cbp);
 
-void copy_embedded_file(cmrc::embedded_filesystem& filesystem,    //
-                        std::string_view           resource_path, //
-                        std::string_view           output_path    //
+void copy_embedded_file(cmrc::embedded_filesystem&   filesystem,    //
+                        const std::string&           resource_path, //
+                        const std::filesystem::path& output_path    //
 ) {
-    const cmrc::file file = filesystem.open(std::string{resource_path});
+    const cmrc::file file = filesystem.open(resource_path);
 
-    std::ofstream{std::string{output_path}} << std::string{file.begin(), file.end()};
+    std::ofstream{output_path} << std::string{file.begin(), file.end()};
 }
 
-void copy_embedded_files() {
+void copy_embedded_files(const std::filesystem::path& output_directory) {
     cmrc::embedded_filesystem filesystem = cmrc::cbp::get_filesystem();
 
-    copy_embedded_file(filesystem, "resources/mkdocs/mkdocs.yml", ".cbp/mkdocs.yml");
-    copy_embedded_file(filesystem, "resources/mkdocs/docs/admonitions.css", ".cbp/docs/admonitions.css");
-    copy_embedded_file(filesystem, "resources/mkdocs/docs/classes.css", ".cbp/docs/classes.css");
-    copy_embedded_file(filesystem, "resources/mkdocs/docs/width.css", ".cbp/docs/width.css");
+    copy_embedded_file(filesystem, "resources/mkdocs/mkdocs.yml", output_directory / "mkdocs.yml");
+    copy_embedded_file(filesystem, "resources/mkdocs/docs/admonitions.css", output_directory / "docs/admonitions.css");
+    copy_embedded_file(filesystem, "resources/mkdocs/docs/classes.css", output_directory / "docs/classes.css");
+    copy_embedded_file(filesystem, "resources/mkdocs/docs/width.css", output_directory / "docs/width.css");
 }
 
 // Output
-void cbp::output::mkdocs(const cbp::profile& profile) try {
+void cbp::output::mkdocs(const cbp::profile& profile, const std::filesystem::path& output_directory) try {
 
     auto callback = [](cbp::formatter_state& state, const cbp::tree& tree) {
         // Indent
@@ -81,14 +81,14 @@ void cbp::output::mkdocs(const cbp::profile& profile) try {
     const auto result = cbp::formatter{std::move(callback)}(profile);
 
     // Ensure proper directory structure
-    std::filesystem::remove_all(".cbp/");
-    std::filesystem::create_directories(".cbp/docs/");
+    std::filesystem::remove_all(output_directory);
+    std::filesystem::create_directories(output_directory / "docs");
 
     // Create files necessary for an MkDocs build
-    std::ofstream(".cbp/docs/index.md") << std::format("# Profiling results\n\n{}", result);
+    std::ofstream(output_directory / "docs/index.md") << std::format("# Profiling results\n\n{}", result);
 
     // Copy MkDocs resources
-    copy_embedded_files();
+    copy_embedded_files(output_directory);
 
 } catch (std::exception& e) {
     throw cbp::exception{"Could not output profile results to the terminal, error:\n{}", e.what()};

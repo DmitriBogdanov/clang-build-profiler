@@ -1,0 +1,81 @@
+<!-- ------- -->
+<!-- Styling -->
+<!-- ------- -->
+
+<style>
+    /* Variables */
+    :root {
+        --cbp-clr-background: #1e2129;
+        --cbp-clr-font: #bec1c6;
+
+        --cbp-clr-timing-red: #ff5252;
+        --cbp-clr-timing-yellow: #ff9100;
+        --cbp-clr-timing-white: #bec1c6;
+        --cbp-clr-timing-gray: #8b8d94;
+    }
+
+    /* Default element styles */
+    body {
+        background-color: var(--cbp-clr-background);
+    }
+
+    summary {
+        color: var(--cbp-clr-font);
+    }
+
+    details {
+        border-width: 0;
+        border-left-width: 4px;
+        border-left-style: solid;
+        border-color: var(--cbp-clr-font);
+        padding-left: 8px;
+    }
+
+    header {
+        color: var(--cbp-clr-font);
+        font-size: 26px;
+        margin: 16px;
+        margin-left: 10px;
+    }
+
+    /* Admonition styles */
+
+    /* Node styles */
+    .cbp-timing-red {
+        color: var(--cbp-clr-timing-red);
+        /* main theme color, adjusts with the light/dark mode */
+    }
+
+    .cbp-timing-yellow {
+        color: var(--cbp-clr-timing-yellow);
+    }
+
+    .cbp-timing-white {
+        color: var(--cbp-clr-timing-white);
+    }
+
+    .cbp-timing-gray {
+        color: var(--cbp-clr-timing-gray);
+    }
+</style>
+
+<!-- ---------------------- -->
+<!-- Profiling results tree -->
+<!-- ---------------------- -->
+
+<header>Profiling results</header>
+
+<details style="margin-left:10px;">
+    <summary>source/utility/prettify.cpp <span class="cbp-timing-red">(1889 ms, 3.78%) | self (0 ms, 0.00%)</span>
+    </summary>
+    <details style="margin-left:30px;">
+        <summary>Parsing <span class="cbp-timing-yellow">(973 ms, 1.95%) | self (0 ms, 0.00%)</span></summary>
+        <details style="margin-left:50px;">
+            <summary>include/utility/replace.hpp <span class="cbp-timing-gray">(316 ms, 0.63%) | self (0 ms, 0.00%)</span></summary>
+        </details>
+    </details>
+    <details style="margin-left:30px;">
+        <summary>Template instantiation <span class="cbp-timing-white">(417 ms, 0.83%) | self (0 ms, 0.00%)</span>
+        </summary>
+    </details>
+</details>

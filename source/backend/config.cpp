@@ -9,8 +9,8 @@
 
 #include <fstream>
 
-#include "external/fkYAML/node.hpp"
 #include "external/boost/regex.hpp"
+#include "external/fkYAML/node.hpp"
 
 #include "utility/colors.hpp"
 #include "utility/exception.hpp"
@@ -53,11 +53,18 @@ cbp::config cbp::config::from_string(std::string_view str) try {
                 config.tree.categorize.red = cbp::milliseconds{categorize.at("red").as_int()};
         }
 
-        if (tree.contains("replace_prefix")) {
-            config.tree.replace_prefix.clear();
+        if (tree.contains("detect_standard_headers"))
+            config.tree.detect_standard_headers = tree.at("detect_standard_headers").as_bool();
 
-            for (const auto& node : tree.at("replace_prefix").as_seq())
-                config.tree.replace_prefix.push_back({.from = node.at("from").as_str(), .to = node.at("to").as_str()});
+        if (tree.contains("detect_project_headers"))
+            config.tree.detect_project_headers = tree.at("detect_project_headers").as_bool();
+
+        if (tree.contains("replace_filepath") && tree.at("replace_filepath").is_sequence()) {
+            config.tree.replace_filepath.clear();
+
+            for (const auto& node : tree.at("replace_filepath").as_seq())
+                config.tree.replace_filepath.push_back(
+                    {.from = node.at("from").as_str(), .to = node.at("to").as_str()});
         }
     }
 
@@ -86,7 +93,7 @@ std::optional<std::string> cbp::config::validate() const {
 
     const bool order_is_correct =
         (threshold_1 < threshold_2) && (threshold_2 < threshold_3) && (threshold_3 < threshold_4);
-        
+
     if (!order_is_correct) return "'tree.categorize' contains durations in the incorrect order.";
 
     return std::nullopt;

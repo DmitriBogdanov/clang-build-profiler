@@ -15,11 +15,11 @@
 // constexpr auto write_options = glz::opts{.prettify = true, .indentation_width = 4};
 constexpr auto write_options = glz::opts{};
 
-void cbp::output::json(const cbp::profile& profile) try {
+void cbp::output::json(const cbp::profile& profile, const std::filesystem::path& output_directory) try {
 
     // Ensure proper directory structure
-    std::filesystem::remove_all(".cbp/");
-    std::filesystem::create_directories(".cbp/");
+    std::filesystem::remove_all(output_directory);
+    std::filesystem::create_directories(output_directory);
 
     // Serialize the JSON dump of the profile
     std::string buffer;

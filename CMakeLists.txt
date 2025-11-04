@@ -30,6 +30,7 @@ target_sources(
     "source/utility/colors.cpp"
     "source/utility/demangle.cpp"
     "source/utility/filepath.cpp"
+    "source/utility/lookup.cpp"
     "source/utility/prettify.cpp"
     "source/utility/replace.cpp"
     "source/utility/version.cpp"

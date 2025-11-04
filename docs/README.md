@@ -38,6 +38,7 @@ clang-build-profiler --build=build/ --output=mkdocs
 | `--output` | Description                                                  | Requirements                  |
 | ---------- | ------------------------------------------------------------ | ----------------------------- |
 | `mkdocs`   | Nicest output for viewing, it uses [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) to serve an interactive GUI in browser | `pip install mkdocs-material` |
+| `html`     | Stand-alone HTML report, not as fancy, but doesn't require MkDocs | None                          |
 | `terminal` | Colored in-terminal output, useful for small projects or with high level of pruning | None                          |
 | `json`     | JSON dump of profiling data, useful for custom analysis pipelines | None                          |
 | `text`     | Text file output, useful for saving human-readable build artifacts with profiling data | None                          |
@@ -59,9 +60,6 @@ The docs can also be viewed directly from GitHub:
 - [Getting started](getting_started.md)
 - [Configuration file](configuration_file.md)
 - [Supported CLI flags](cli_arguments.md)
-- [Profiling a CMake build]()
-- [Profiling a Visual Studio build]()
-- [Profiling an individual translation unit]()
 - [Building the project locally](building_locally.md)
 - [Technical limitations](technical_limitations.md)
 

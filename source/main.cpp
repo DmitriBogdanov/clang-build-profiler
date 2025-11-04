@@ -90,18 +90,24 @@ int main(int argc, char* argv[]) try {
         .required()                               //
         .help("Specifies custom config path");    //
 
-    auto& artifact_group = cli.add_mutually_exclusive_group();
+    cli                                             //
+        .add_argument("-a", "--artifacts")          //
+        .default_value(".cbp/")                     //
+        .required()                                 //
+        .help("Specifies custom output directory"); //
 
-    artifact_group                              //
+    auto& exclusive_group = cli.add_mutually_exclusive_group();
+
+    exclusive_group                             //
         .add_argument("-b", "--build")          //
         .default_value(std::string{"build/"})   //
         .help("Selects CMake build directory"); //
 
-    artifact_group                                  //
+    exclusive_group                                 //
         .add_argument("-t", "--target")             //
         .help("Selects build artifacts directory"); //
 
-    artifact_group                                  //
+    exclusive_group                                 //
         .add_argument("-f", "--file")               //
         .help("Selects specific translation unit"); //
 
@@ -118,8 +124,10 @@ int main(int argc, char* argv[]) try {
     }
 
     // Parse config
-    const std::string config_path = cli.get<std::string>("--config");
+    const std::string working_directory = std::filesystem::current_path().string();
+    const std::string config_path       = cli.get<std::string>("--config");
 
+    std::println("Working directory is {{ {} }}...", working_directory);
     std::println("Parsing config {{ {} }}...", config_path);
 
     const cbp::config config =
@@ -156,17 +164,21 @@ int main(int argc, char* argv[]) try {
     // Prettify the results
     std::println("Preprocessing results...");
 
-    cbp::preprocess(profile);
+    cbp::preprocess(profile, working_directory);
 
     // Invoke the frontend
-    std::println("Invoking frontend...");
+    const std::string selected_output = cli.get("--output");
 
-    if (cli.get("--output") == "terminal") {
+    std::println("Invoking frontend for {{ {} }}...", selected_output);
+
+    const std::string output_directory_path = cli.get<std::string>("--artifacts");
+
+    if (selected_output == "terminal") {
         cbp::output::terminal(profile);
-    } else if (cli.get("--output") == "mkdocs") {
-        cbp::output::mkdocs(profile);
-    } else if (cli.get("--output") == "json") {
-        cbp::output::json(profile);
+    } else if (selected_output == "mkdocs") {
+        cbp::output::mkdocs(profile, output_directory_path);
+    } else if (selected_output == "json") {
+        cbp::output::json(profile, output_directory_path);
     } else {
         exit_failure("Not implemented yet.");
     }

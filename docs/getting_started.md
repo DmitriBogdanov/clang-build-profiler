@@ -7,7 +7,6 @@ Pre-compiled binaries can be found in [Releases](https://github.com/DmitriBogdan
 - Windows x86-64
 - Ubuntu x86-64
 - MacOS x86-64
-- FreeBSD x86-64
 
 For platforms outside of the supported list, the build can be produced locally, see the [corresponding guide](building_locally.md).
 

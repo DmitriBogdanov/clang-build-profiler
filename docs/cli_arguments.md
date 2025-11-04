@@ -6,6 +6,7 @@
 | `-v`, `--version`      | Unique flag         | -                       | Displays application version                                 |
 | `-w`, `--write-config` | Unique flag         | -                       | Creates config file corresponding to the default configuration |
 | `-c`, `--config`       | Optional argument   | `.clang-build-profiler` | Specifies custom config path                                 |
+| `-a`, `--artifacts`    | Optional argument   | `.cbp/`                 | Specifies custom output directory                            |
 | `-o`, `--output`       | Optional argument   | `terminal`              | Selects profiling output format                              |
 | `-b`, `--build`        | Exclusive group [1] | `build/`                | Selects CMake build directory                                |
 | `-t`, `--target`       | Exclusive group [1] | -                       | Selects build artifacts directory                            |
@@ -67,6 +68,20 @@ Short form:
 
 ```sh
 clang-build-profiler -c "configs/clang-build-profiler.yml"
+```
+
+### Specify custom output path
+
+Verbose form:
+
+```sh
+clang-build-profiler --artifacts="data/clang-build-profiler/"
+```
+
+Short form:
+
+```sh
+clang-build-profiler -a "data/clang-build-profiler/"
 ```
 
 ### Specify output format
