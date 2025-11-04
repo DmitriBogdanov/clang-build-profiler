@@ -1,6 +1,3 @@
-> [!Warning]
-> This project is under development. Current documentations acts more like a rough specification of intended features, rather than an accurate representation of the software. Nonetheless, the core functionality is mostly completed.
-
 [<img src ="images/badge_language_cpp_23.svg">](https://en.cppreference.com/w/cpp/23.html)
 [<img src ="images/badge_license_mit.svg">](LICENSE.md)
 [<img src ="images/badge_semver.svg">](https://semver.org/)
@@ -48,7 +45,7 @@ clang-build-profiler --build=build/ --output=mkdocs
 - Builds a tree of includes and their parse timings
 - Builds a tree of template instantiations and their timings
 - Summarizes the information above into a digestible format
-- Prettifies standard templates and their expansion (e.g. `std::basic_string<char, ...>` ↦ `std::string`)
+- Prettifies standard templates and their expansion (e.g. `std::basic_string<char, ...>` ➜ `std::string`)
 - Automatically analyzes CMake builds with multiple targets
 
 ## Documentation
@@ -86,7 +83,7 @@ The source code of this project embeds several dependencies:
 
 ## Roadmap
 
-- A native GUI output with `--output=gui`
+- Possibly a native GUI output with `--output=gui`
 - Refinements in template prettification
 - Tests on larger codebases
 - A better selection of summaries
@@ -94,4 +91,4 @@ The source code of this project embeds several dependencies:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](../LICENSE.md) for details.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) for details.

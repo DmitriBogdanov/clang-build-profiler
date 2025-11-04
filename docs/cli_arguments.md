@@ -1,5 +1,7 @@
 # Supported CLI arguments
 
+[<- to README.md](..)
+
 | Argument               | Type                | Default value           | Description                                                  |
 | ---------------------- | ------------------- | ----------------------- | ------------------------------------------------------------ |
 | `-h`, `--help`         | Unique flag         | -                       | Displays help message                                        |

@@ -1,0 +1,102 @@
+# __________________________________ CONTENTS ___________________________________
+#
+#    This is a MkDocs Material config for automatically deployed GitHub Pages,
+#    see https://squidfunk.github.io/mkdocs-material/
+# _______________________________________________________________________________
+
+# ============
+# --- Core ---
+# ============
+
+site_name: "clang-build-profiler"
+
+site_url: https://dmitribogdanov.github.io/clang-build-profiler/
+
+repo_url: https://github.com/DmitriBogdanov/clang-build-profiler
+
+repo_name: GitHub/clang-build-profiler
+
+# ===========================
+# --- Markdown extensions ---
+# ===========================
+
+# We need 2 extensions:
+#    1. Github-flavor callouts
+#    2. Code blocks nested in block quotes
+#
+# Default 'admonition' plugin uses a different syntax so it's not suitable for callouts.
+# Thankfully, we can still achieve it with 3rd party plugins.
+#
+# [install 3rd party plugins]: 'pip install markdown-callouts'
+
+markdown_extensions:
+  - github-callouts      # enables Github-flavour callouts
+  - pymdownx.superfences # enables nesting of code and content blocks
+  - toc:                 # enables permalink buttons next to the section headings
+      permalink: true    #
+
+extra_javascript:
+  - mkdocs/relative_links.js # adjusts relative links to work with the website
+
+# =========================
+# --- Style & structure ---
+# =========================
+
+plugins:
+  - offline     # enables HTML with relative paths
+  - search      # enables search function
+  - social      # enables thumbnail generation for externally shared links
+
+theme:
+  name: material
+  
+  favicon: images/pages_favicon.svg
+  
+  icon:
+    logo: material/chart-donut-variant
+    repo: fontawesome/brands/github
+  
+  # Color palette with a light/dark mode toggle
+  palette:
+    # Dark mode (default)
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch-off
+        name: Switch to light mode
+      primary: black
+      accent: light blue
+    # Light mode
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+      primary: deep purple
+      accent: purple
+  
+  features:
+    - toc.follow        # makes the sidebar automatically scroll to keep current TOC heading visible
+    - content.code.copy # adds copy button to code blocks
+    - search.suggest    # adds greyed-out suggestion to the search
+    - content.tooltips  # improves the style of hover tooltips (library name, permalink button, mode switch, repo link)
+    
+# Navigation order
+nav:
+  - README.md
+  - getting_started.md
+  - configuration_file.md
+  - cli_arguments.md
+  - building_locally.md
+  - technical_limitations.md
+  - LICENSE.md
+
+# Footer configuration
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/DmitriBogdanov
+
+copyright: "Copyright &copy; 2025 Dmitri Bogdanov"
+
+extra_css:
+  - mkdocs/callouts.css # fix for 'markdown-callouts' plugin missing the style for '[!Important]'
+  - mkdocs/width.css    # makes page content wide on large screens

@@ -1,5 +1,7 @@
 # Technical limitations
 
+[<- to README.md](..)
+
 ## Transitive include attribution
 
 It is possible that multiple headers `h1.hpp` and `h2.hpp` transitively include the same header `heavy.hpp`.

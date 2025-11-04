@@ -58,7 +58,7 @@ sudo apt update && sudo apt install python3
 After this, to install necessary dependencies run:
 
 ```sh
-pip install mkdocs-material mkdocs-material[imaging] markdown-callouts mkdocs-awesome-nav
+pip install mkdocs-material mkdocs-material[imaging] markdown-callouts
 ```
 
 ### Building

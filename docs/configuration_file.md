@@ -1,5 +1,7 @@
 # Configuration file
 
+[<- to README.md](..)
+
 ## Basics
 
 Following the convention of other LLVM tools, `clang-build-profiler` uses a YAML config `.clang-build-profiler` placed into the project root.

@@ -1,5 +1,7 @@
 # Getting started
 
+[<- to README.md](..)
+
 ## Installation
 
 Pre-compiled binaries can be found in [Releases](https://github.com/DmitriBogdanov/clang-build-profiler/releases) for following platforms:
