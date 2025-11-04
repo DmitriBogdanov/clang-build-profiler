@@ -16,6 +16,7 @@
 
 #include "backend/config.hpp"
 #include "backend/invoke.hpp"
+#include "frontend/html.hpp"
 #include "frontend/json.hpp"
 #include "frontend/mkdocs.hpp"
 #include "frontend/preprocessor.hpp"
@@ -111,11 +112,11 @@ int main(int argc, char* argv[]) try {
         .add_argument("-f", "--file")               //
         .help("Selects specific translation unit"); //
 
-    cli                                                //
-        .add_argument("-o", "--output")                //
-        .choices("terminal", "mkdocs", "text", "json") //
-        .default_value(std::string{"terminal"})        //
-        .help("Selects profiling output format");      //
+    cli                                                        //
+        .add_argument("-o", "--output")                        //
+        .choices("mkdocs", "html", "terminal", "json", "text") //
+        .default_value(std::string{"terminal"})                //
+        .help("Selects profiling output format");              //
 
     try {
         cli.parse_args(argc, argv);
@@ -173,10 +174,12 @@ int main(int argc, char* argv[]) try {
 
     const std::string output_directory_path = cli.get<std::string>("--artifacts");
 
-    if (selected_output == "terminal") {
-        cbp::output::terminal(profile);
-    } else if (selected_output == "mkdocs") {
+    if (selected_output == "mkdocs") {
         cbp::output::mkdocs(profile, output_directory_path);
+    } else if (selected_output == "html") {
+        cbp::output::html(profile, output_directory_path);
+    } else if (selected_output == "terminal") {
+        cbp::output::terminal(profile);
     } else if (selected_output == "json") {
         cbp::output::json(profile, output_directory_path);
     } else {

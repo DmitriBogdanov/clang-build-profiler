@@ -23,12 +23,14 @@ target_sources(
     "source/backend/analyze.cpp"
     "source/backend/config.cpp"
     "source/backend/invoke.cpp"
+    "source/frontend/html.cpp"
     "source/frontend/json.cpp"
     "source/frontend/mkdocs.cpp"
     "source/frontend/preprocessor.cpp"
     "source/frontend/terminal.cpp"
     "source/utility/colors.cpp"
     "source/utility/demangle.cpp"
+    "source/utility/embedded.cpp"
     "source/utility/filepath.cpp"
     "source/utility/lookup.cpp"
     "source/utility/prettify.cpp"
@@ -46,6 +48,7 @@ include(cmake/CMakeRC.cmake)
 cmrc_add_resource_library(
     clang-build-profiler-resources
     NAMESPACE cbp
+    "resources/html/report.html"
     "resources/mkdocs/mkdocs.yml"
     "resources/mkdocs/docs/admonitions.css"
     "resources/mkdocs/docs/classes.css"

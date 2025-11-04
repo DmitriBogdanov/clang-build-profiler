@@ -81,13 +81,13 @@ theme:
     
 # Navigation order
 nav:
-  - README.md
-  - getting_started.md
-  - configuration_file.md
-  - cli_arguments.md
-  - building_locally.md
-  - technical_limitations.md
-  - LICENSE.md
+  - Overview          : README.md
+  - Getting started   : getting_started.md
+  - Configuration file: configuration_file.md
+  - CLI arguments     : cli_arguments.md
+  - Building locally  : building_locally.md
+  - Limitations       : technical_limitations.md
+  - License           : LICENSE.md
 
 # Footer configuration
 extra:

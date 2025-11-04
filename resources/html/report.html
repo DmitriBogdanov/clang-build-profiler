@@ -21,6 +21,7 @@
 
     summary {
         color: var(--cbp-clr-font);
+        margin: 2px;
     }
 
     details {
@@ -29,6 +30,14 @@
         border-left-style: solid;
         border-color: var(--cbp-clr-font);
         padding-left: 8px;
+    }
+    
+    div {
+        border-width: 0;
+        border-left-width: 4px;
+        border-left-style: solid;
+        border-color: var(--cbp-clr-font);
+        padding-left: 22px;
     }
 
     header {
@@ -58,24 +67,3 @@
         color: var(--cbp-clr-timing-gray);
     }
 </style>
-
-<!-- ---------------------- -->
-<!-- Profiling results tree -->
-<!-- ---------------------- -->
-
-<header>Profiling results</header>
-
-<details style="margin-left:10px;">
-    <summary>source/utility/prettify.cpp <span class="cbp-timing-red">(1889 ms, 3.78%) | self (0 ms, 0.00%)</span>
-    </summary>
-    <details style="margin-left:30px;">
-        <summary>Parsing <span class="cbp-timing-yellow">(973 ms, 1.95%) | self (0 ms, 0.00%)</span></summary>
-        <details style="margin-left:50px;">
-            <summary>include/utility/replace.hpp <span class="cbp-timing-gray">(316 ms, 0.63%) | self (0 ms, 0.00%)</span></summary>
-        </details>
-    </details>
-    <details style="margin-left:30px;">
-        <summary>Template instantiation <span class="cbp-timing-white">(417 ms, 0.83%) | self (0 ms, 0.00%)</span>
-        </summary>
-    </details>
-</details>
