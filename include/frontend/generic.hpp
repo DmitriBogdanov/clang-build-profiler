@@ -11,27 +11,29 @@
 
 #pragma once
 
+#include "fmt/format.h"
+
 #include "backend/profile.hpp"
 
 
 namespace cbp::output {
-    
-    struct string_state {
-        std::size_t       depth{};
-        cbp::microseconds timeframe{};
-        std::string       str{};
-        
-        string_state(const cbp::profile& profile) : timeframe(profile.tree.total) {}
-        
-        template <class... Args>
-        void format(std::format_string<Args...> fmt, Args&&... args) {
-            std::format_to(std::back_inserter(this->str), fmt, std::forward<Args>(args)...);
-        }
-        
-        template <class... Args>
-        void vformat(std::string_view fmt, Args&&... args) {
-            std::vformat_to(std::back_inserter(this->str), fmt, std::forward<Args>(args)...);
-        }
-    };
-    
-}
+
+struct string_state {
+    std::size_t       depth{};
+    cbp::microseconds timeframe{};
+    std::string       str{};
+
+    string_state(const cbp::profile& profile) : timeframe(profile.tree.total) {}
+
+    template <class... Args>
+    void format(fmt::format_string<Args...> fmt, Args&&... args) {
+        fmt::format_to(std::back_inserter(this->str), fmt, std::forward<Args>(args)...);
+    }
+
+    template <class... Args>
+    void vformat(std::string_view fmt, Args&&... args) {
+        fmt::vformat_to(std::back_inserter(this->str), fmt, std::forward<Args>(args)...);
+    }
+};
+
+} // namespace cbp::output

@@ -30,7 +30,7 @@ void serialize(cbp::output::string_state& state, const cbp::tree& tree) {
                             : tree.category == cbp::tree_category::white  ? "white"
                                                                           : "gray";
 
-    const auto color = std::format("<span class=\"cbp-timing-{}\">", color_name);
+    const auto color = fmt::format("<span class=\"cbp-timing-{}\">", color_name);
     const auto reset = "</span>";
 
     std::string name = tree.name;
@@ -38,13 +38,6 @@ void serialize(cbp::output::string_state& state, const cbp::tree& tree) {
     cbp::replace_all(name, ">", "&gt;");
     cbp::replace_all(name, "*", "\\*");
     cbp::replace_all(name, "_", "\\_");
-
-// TEMP: Fix for 'libc++' 'std::format_to' bug, see
-// https://github.com/llvm/llvm-project/issues/160666
-// https://github.com/llvm/llvm-project/issues/154670
-#ifdef _LIBCPP_VERSION
-    if (name.size() % 256 == 0) name += ' ';
-#endif
 
     const auto prefix = tree.children.empty() ? "!!!" : "???";
 
@@ -82,7 +75,7 @@ void cbp::output::mkdocs(const cbp::profile& profile, const std::filesystem::pat
 
     // Create files with results
     std::ofstream(output_directory / "docs/index.md")
-        << std::format("<header>Profiling results</header>\n\n{}", state.str);
+        << fmt::format("<header>Profiling results</header>\n\n{}", state.str);
 
 } catch (std::exception& e) {
     throw cbp::exception{"Could not output profile results as MkDocs, error:\n{}", e.what()};

@@ -29,7 +29,6 @@ target_sources(
     "source/frontend/preprocessor.cpp"
     "source/frontend/terminal.cpp"
     "source/frontend/text.cpp"
-    "source/utility/colors.cpp"
     "source/utility/demangle.cpp"
     "source/utility/embedded.cpp"
     "source/utility/filepath.cpp"
@@ -37,6 +36,9 @@ target_sources(
     "source/utility/prettify.cpp"
     "source/utility/replace.cpp"
     "source/utility/version.cpp"
+    "source/external/fmt/fmt.cc"
+    "source/external/fmt/format.cc"
+    "source/external/fmt/os.cc"
 )
 
 target_compile_features(clang-build-profiler PRIVATE ${CBP_COMPILE_FEATURES})

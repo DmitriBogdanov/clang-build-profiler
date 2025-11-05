@@ -7,13 +7,13 @@
 
 #include "utility/version.hpp"
 
-#include <format>
+#include "external/fmt/format.h"
 
 
-std::string cbp::version::format_semantic() { return std::format("{}.{}.{}", major, minor, patch); }
+std::string cbp::version::format_semantic() { return fmt::format("{}.{}.{}", major, minor, patch); }
 
 std::string cbp::version::format_full() {
-    return std::format(                    //
+    return fmt::format(                    //
         "{} version {}.{}.{} ({} {})\n{}", //
         program,                           //
         major, minor, patch,               //

@@ -82,7 +82,7 @@ std::optional<std::string> cbp::config::validate() const {
     // Validate version
     if (!boost::regex_match(this->version, boost::regex{R"(^\d*\.\d*\.\d*)"})) {
         constexpr auto fmt = "'version' has a value {{ {} }}, which doesn't the schema <major>.<minor>.<patch>";
-        return std::format(fmt, this->version);
+        return fmt::format(fmt, this->version);
     }
 
     // Validate tree categorization

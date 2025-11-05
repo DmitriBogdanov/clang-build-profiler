@@ -9,10 +9,10 @@
 // Program entry point. Handles CLI args and invokes the analyzer.
 // _________________________________________________________________________________
 
-#include <print>
-
 #include "external/UTL/time.hpp"
 #include "external/argparse/argparse.hpp"
+#include "external/fmt/color.h"
+#include "external/fmt/format.h"
 
 #include "backend/config.hpp"
 #include "backend/invoke.hpp"
@@ -25,27 +25,42 @@
 #include "utility/exception.hpp"
 #include "utility/version.hpp"
 
+
+constexpr auto style_step    = fmt::fg(fmt::color::dark_blue) | fmt::emphasis::bold;
+constexpr auto style_hint    = fmt::fg(fmt::color::yellow) | fmt::emphasis::bold;
+constexpr auto style_error   = fmt::fg(fmt::color::indian_red) | fmt::emphasis::bold;
+constexpr auto style_path    = fmt::fg(fmt::color::saddle_brown);
+constexpr auto style_enum    = fmt::fg(fmt::color::teal);
+constexpr auto style_command = fmt::fg(fmt::color::purple) | fmt::emphasis::bold;
+
 utl::time::Stopwatch stopwatch;
 
 template <class... Args>
-void exit_failure(std::format_string<Args...> fmt, Args&&... args) {
-    std::println("Execution failed with with code {}, elapsed time: {}", EXIT_FAILURE, stopwatch.elapsed_string());
-    std::println(fmt, std::forward<Args>(args)...);
+void exit_failure(fmt::format_string<Args...> fmt, Args&&... args) {
+    fmt::println("Execution failed with with code {}, elapsed time: {}", EXIT_FAILURE, stopwatch.elapsed_string());
+    fmt::println(fmt, std::forward<Args>(args)...);
 
     std::exit(EXIT_FAILURE);
 }
 
 template <class... Args>
-void exit_success(std::format_string<Args...> fmt, Args&&... args) {
-    std::println("Execution finished, elapsed time: {}", stopwatch.elapsed_string());
-    std::println(fmt, std::forward<Args>(args)...);
+void exit_failure_quiet(fmt::format_string<Args...> fmt, Args&&... args) {
+    fmt::println(fmt, std::forward<Args>(args)...);
+
+    std::exit(EXIT_FAILURE);
+}
+
+template <class... Args>
+void exit_success(fmt::format_string<Args...> fmt, Args&&... args) {
+    fmt::println("Execution finished, elapsed time: {}", stopwatch.elapsed_string());
+    fmt::println(fmt, std::forward<Args>(args)...);
 
     std::exit(EXIT_SUCCESS);
 }
 
 template <class... Args>
-void exit_success_quiet(std::format_string<Args...> fmt, Args&&... args) {
-    std::println(fmt, std::forward<Args>(args)...);
+void exit_success_quiet(fmt::format_string<Args...> fmt, Args&&... args) {
+    fmt::println(fmt, std::forward<Args>(args)...);
 
     std::exit(EXIT_SUCCESS);
 }
@@ -115,6 +130,7 @@ int main(int argc, char* argv[]) try {
 
     cli                                                        //
         .add_argument("-o", "--output")                        //
+        .required()                                            //
         .choices("mkdocs", "html", "terminal", "json", "text") //
         .default_value(std::string{"terminal"})                //
         .help("Selects profiling output format");              //
@@ -122,15 +138,23 @@ int main(int argc, char* argv[]) try {
     try {
         cli.parse_args(argc, argv);
     } catch (std::exception& e) {
-        exit_failure("{}\n\n Run `clang-report --help` to see the full usage guide.", e.what());
+        fmt::println("{}", fmt::styled("Error parsing CLI arguments:", style_error));
+        fmt::println("");
+        fmt::println("{}", e.what());
+        fmt::println("");
+        fmt::println("Run {} to see the full usage guide.", fmt::styled("clang-report --help", style_command));
+        exit_failure_quiet("");
     }
 
     // Parse config
     const std::string working_directory = std::filesystem::current_path().string();
     const std::string config_path       = cli.get<std::string>("--config");
 
-    std::println("Working directory is {{ {} }}...", working_directory);
-    std::println("Parsing config {{ {} }}...", config_path);
+    fmt::print(style_step, "Step 1/5: ");
+    fmt::println("Working directory is {{ {} }}...", fmt::styled(working_directory, style_path));
+
+    fmt::print(style_step, "Step 2/5: ");
+    fmt::println("Parsing config {{ {} }}...", fmt::styled(config_path, style_path));
 
     const cbp::config config =
         std::filesystem::exists(config_path) ? cbp::config::from_file(config_path) : cbp::config{};
@@ -146,45 +170,72 @@ int main(int argc, char* argv[]) try {
     if (cli.is_used("--file")) {
         const std::string path = cli.get<std::string>("--file");
 
-        std::println("Analyzing translation unit {{ {} }}...", path);
+        fmt::print(style_step, "Step 3/5: ");
+        fmt::println("Analyzing translation unit {{ {} }}...", fmt::styled(path, style_path));
 
         profile.tree = cbp::analyze_translation_unit(path);
     } else if (cli.is_used("--target")) {
         const std::string path = cli.get<std::string>("--target");
 
-        std::println("Analyzing target {{ {} }}...", path);
+        fmt::print(style_step, "Step 3/5: ");
+        fmt::println("Analyzing target {{ {} }}...", fmt::styled(path, style_path));
 
         profile.tree = cbp::analyze_target(path);
     } else {
         const std::string path = cli.get<std::string>("--build");
 
-        std::println("Analyzing CMake build {{ {} }}...", path);
+        fmt::print(style_step, "Step 3/5: ");
+        fmt::println("Analyzing CMake build {{ {} }}...", fmt::styled(path, style_path));
 
         profile.tree = cbp::analyze_build(path);
     }
 
     // Prettify the results
-    std::println("Preprocessing results...");
+    fmt::print(style_step, "Step 4/5: ");
+    fmt::println("Preprocessing results...");
 
     cbp::preprocess(profile, working_directory);
 
     // Invoke the frontend
     const std::string selected_output = cli.get("--output");
 
-    std::println("Invoking frontend for {{ {} }}...", selected_output);
+    fmt::print(style_step, "Step 5/5: ");
+    fmt::println("Invoking frontend for {{ {} }}...", fmt::styled(selected_output, style_enum));
 
-    const std::string output_directory_path = cli.get<std::string>("--artifacts");
+    const std::filesystem::path output_directory_path = cli.get<std::string>("--artifacts");
 
     if (selected_output == "mkdocs") {
         cbp::output::mkdocs(profile, output_directory_path);
+
+        fmt::print(style_hint, "Hint: ");
+        fmt::print("To open the generated report in browser run ");
+        fmt::print(style_command, "(cd {} && mkdocs serve --open)", output_directory_path.string());
+        fmt::println("");
+
     } else if (selected_output == "html") {
         cbp::output::html(profile, output_directory_path);
+
+        const auto report_path = output_directory_path / "report.html";
+
+        fmt::print(style_hint, "Hint: ");
+        fmt::print("To open the generated report in browser run ");
+        fmt::print(style_command, "open {}", report_path.string());
+        fmt::println("");
+
     } else if (selected_output == "terminal") {
         cbp::output::terminal(profile);
     } else if (selected_output == "json") {
         cbp::output::json(profile, output_directory_path);
     } else if (selected_output == "text") {
         cbp::output::text(profile, output_directory_path);
+
+        const auto report_path = output_directory_path / "report.txt";
+
+        fmt::print(style_hint, "Hint: ");
+        fmt::print("To open the generated report in text editor run ");
+        fmt::print(style_command, "open {}", report_path.string());
+        fmt::println("");
+
     } else {
         exit_failure("Not implemented yet.");
     }
@@ -192,9 +243,9 @@ int main(int argc, char* argv[]) try {
     exit_success("");
 
 } catch (cbp::exception& e) {
-    std::println("Terminated due to exception:\n{}", e.what());
+    fmt::println("Terminated due to exception:\n{}", e.what());
     // we use a custom exception class with more debug info & colored formatting
 } catch (std::exception& e) {
-    std::println("Terminated due to unhandled exception:\n{}", e.what());
+    fmt::println("Terminated due to unhandled exception:\n{}", e.what());
     // there should be no other exceptions unless we run into an 'std::bad_alloc'
 }

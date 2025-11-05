@@ -9,6 +9,8 @@
 
 #include <filesystem>
 
+#include "external/fmt/format.h"
+
 #include "utility/filepath.hpp"
 #include "utility/lookup.hpp"
 #include "utility/prettify.hpp"
@@ -39,7 +41,7 @@ void shorten_standard_headers(std::vector<cbp::tree>& children) {
             const auto filename = cbp::trim_filepath(child.name);
 
             if (cbp::lookup::is_standard_header(filename)) {
-                child.name = std::format("<{}>", filename);
+                child.name = fmt::format("<{}>", filename);
                 child.self = child.total; // since we remove the info about the children
                 child.children.clear();
             }

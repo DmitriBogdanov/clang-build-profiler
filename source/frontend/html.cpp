@@ -32,22 +32,17 @@ void serialize(cbp::output::string_state& state, const cbp::tree& tree) {
                             : tree.category == cbp::tree_category::white  ? "white"
                                                                           : "gray";
 
-    const auto color = std::format("<span class=\"cbp-timing-{}\">", color_name);
+    const auto color = fmt::format("<span class=\"cbp-timing-{}\">", color_name);
     const auto reset = "</span>";
 
     std::string name = tree.name;
     cbp::replace_all(name, "<", "&lt;");
     cbp::replace_all(name, ">", "&gt;");
 
-    if (name.size() % 256 == 0) name += ' ';
-    // TEMP: Fix for 'libc++' 'std::format_to' bug, see
-    // https://github.com/llvm/llvm-project/issues/160666
-    // https://github.com/llvm/llvm-project/issues/154670
-
     const std::string_view tag = tree.children.empty() ? "div" : "details";
 
-    const std::string prefix = std::format("<{} style=\"margin-left:{}px\">", tag, indent_px);
-    const std::string suffix = std::format("</{}>", tag);
+    const std::string prefix = fmt::format("<{} style=\"margin-left:{}px\">", tag, indent_px);
+    const std::string suffix = fmt::format("</{}>", tag);
 
     const auto source_indent = [&] {
         for (std::size_t i = 0; i < state.depth; ++i) state.format("    "); // indent for source readability
@@ -96,6 +91,6 @@ void cbp::output::html(const cbp::profile& profile, const std::filesystem::path&
                                          "\n";
 
     std::ofstream(output_directory / "report.html", std::ios::app)
-        << std::format("{}{}", tree_section_header, state.str);
+        << fmt::format("{}{}", tree_section_header, state.str);
 
 } catch (std::exception& e) { throw cbp::exception{"Could not output profile results as HTML, error:\n{}", e.what()}; }

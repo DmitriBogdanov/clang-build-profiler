@@ -53,9 +53,3 @@ constexpr std::string_view bold_bright_white   = "\033[97;1m";
 constexpr std::string_view reset = "\033[0m";
 
 } // namespace cbp::ansi
-
-namespace cbp {
-
-[[nodiscard]] std::string_view color_from_name(std::string_view name);
-
-} // namespace cbp

@@ -12,7 +12,7 @@
 #pragma once
 
 #include "backend/tree.hpp"
-#include "config.hpp"
+#include "backend/config.hpp"
 
 
 namespace cbp {

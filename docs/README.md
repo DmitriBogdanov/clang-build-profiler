@@ -75,6 +75,7 @@ The source code of this project embeds several dependencies:
 | Library                                         | Version      | License                                                      | Used for                     |
 | ----------------------------------------------- | ------------ | ------------------------------------------------------------ | ---------------------------- |
 | [UTL](https://github.com/DmitriBogdanov/UTL)    | **v8.3.3**   | [MIT](https://github.com/DmitriBogdanov/UTL/blob/master/docs/LICENSE.md) | Formatting                   |
+| [fmt](https://github.com/fmtlib/fmt)            | **v12.1.0**  | [MIT](https://github.com/fmtlib/fmt/blob/master/LICENSE)     | Formatting & terminal IO     |
 | [glaze](https://github.com/stephenberry/glaze)  | **v6.0.0**   | [MIT](https://github.com/stephenberry/glaze/blob/main/LICENSE) | JSON parsing & serialization |
 | [argparse](https://github.com/p-ranav/argparse) | **v3.2**     | [MIT](https://github.com/p-ranav/argparse/blob/master/LICENSE) | CLI argument parsing         |
 | [fkYAML](https://github.com/fktn-k/fkYAML)      | **v0.4.2**   | [MIT](https://github.com/fktn-k/fkYAML/blob/main/LICENSE.txt) | YAML parsing                 |
