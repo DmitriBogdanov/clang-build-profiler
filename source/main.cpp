@@ -21,6 +21,7 @@
 #include "frontend/mkdocs.hpp"
 #include "frontend/preprocessor.hpp"
 #include "frontend/terminal.hpp"
+#include "frontend/text.hpp"
 #include "utility/exception.hpp"
 #include "utility/version.hpp"
 
@@ -182,6 +183,8 @@ int main(int argc, char* argv[]) try {
         cbp::output::terminal(profile);
     } else if (selected_output == "json") {
         cbp::output::json(profile, output_directory_path);
+    } else if (selected_output == "text") {
+        cbp::output::text(profile, output_directory_path);
     } else {
         exit_failure("Not implemented yet.");
     }

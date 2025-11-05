@@ -85,5 +85,5 @@ void cbp::output::mkdocs(const cbp::profile& profile, const std::filesystem::pat
         << std::format("<header>Profiling results</header>\n\n{}", state.str);
 
 } catch (std::exception& e) {
-    throw cbp::exception{"Could not output profile results sd MkDocs, error:\n{}", e.what()};
+    throw cbp::exception{"Could not output profile results as MkDocs, error:\n{}", e.what()};
 }

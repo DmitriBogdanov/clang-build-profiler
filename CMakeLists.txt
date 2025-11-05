@@ -28,6 +28,7 @@ target_sources(
     "source/frontend/mkdocs.cpp"
     "source/frontend/preprocessor.cpp"
     "source/frontend/terminal.cpp"
+    "source/frontend/text.cpp"
     "source/utility/colors.cpp"
     "source/utility/demangle.cpp"
     "source/utility/embedded.cpp"
