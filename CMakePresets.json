@@ -44,7 +44,7 @@
             "cacheVariables": {
                 "CMAKE_CXX_FLAGS_DEBUG": "",
                 "CMAKE_CXX_FLAGS_RELEASE": "",
-                "CBP_COMPILER_FLAGS": "/O2;/W3;/permissive-;/Zc:preprocessor",
+                "CBP_COMPILER_FLAGS": "/O2;/W3;/permissive-;/Zc:preprocessor;/utf-8",
                 "CBP_LINKER_FLAGS": ""
             }
         }

@@ -36,9 +36,7 @@ target_sources(
     "source/utility/prettify.cpp"
     "source/utility/replace.cpp"
     "source/utility/version.cpp"
-    "source/external/fmt/fmt.cc"
     "source/external/fmt/format.cc"
-    "source/external/fmt/os.cc"
 )
 
 target_compile_features(clang-build-profiler PRIVATE ${CBP_COMPILE_FEATURES})
