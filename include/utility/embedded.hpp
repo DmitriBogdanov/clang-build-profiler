@@ -12,10 +12,12 @@
 #pragma once
 
 #include <string>
+#include <filesystem>
 
 
 namespace cbp {
     
 void clone_from_embedded(const std::string& resource_path, const std::string& output_path);
+void clone_from_embedded(const std::string& resource_path, const std::filesystem::path& output_path);
     
 }

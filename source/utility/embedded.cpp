@@ -23,3 +23,8 @@ void cbp::clone_from_embedded(const std::string& resource_path, const std::strin
     // Serialize it to an output file
     std::ofstream{output_path} << std::string{file.begin(), file.end()};
 }
+
+void cbp::clone_from_embedded(const std::string& resource_path, const std::filesystem::path& output_path) {
+    cbp::clone_from_embedded(resource_path, output_path.string());
+    // can be lossy on windows, but we don't really care about non-ascii paths
+}
