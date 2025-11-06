@@ -73,6 +73,10 @@ cbp::tree cbp::analyze_target(std::string_view path) try {
     // Gather root node timing
     for (const auto& child : target_tree.children) target_tree.total += child.total;
 
+    // Order translation units alphabetically so they reflect the filesystem order
+    std::sort(target_tree.children.begin(), target_tree.children.end(),
+              [](const cbp::tree& a, const cbp::tree& b) { return a.name < b.name; });
+
     return target_tree;
 
 } catch (std::exception& e) { throw cbp::exception{"Could not analyze target {{ {} }}, error:\n{}", path, e.what()}; }

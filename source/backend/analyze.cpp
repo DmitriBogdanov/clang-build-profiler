@@ -7,6 +7,9 @@
 
 #include "backend/analyze.hpp"
 
+#include "external/fmt/chrono.h" // TEMP:
+#include <stack>
+
 #include "backend/trace.hpp"
 #include "utility/exception.hpp"
 
@@ -64,95 +67,86 @@ std::optional<cbp::trace::event> extract_event_by_name(std::vector<cbp::trace::e
 // transitive includes based on the "b" / "e" event nesting. Below is a simple example:
 //
 // Events:
-//    > root-b      | parent: parsing | current: root   | cursor: 0 | creates 'root'
-//    >    child1-b | parent: root    | current: child1 | cursor: 1 | creates 'child1'
-//    >    child1-e | parent: root    | current: child1 | cursor: 2 | ends    'child1'
-//    >    child2-b | parent: root    | current: child2 | cursor: 3 | creates 'child2'
-//    >    child2-e | parent: root    | current: child2 | cursor: 4 | ends    'child2'
-//    > root-e      | parent: root    | current: root   | cursor: 5 | ends    'root'
+//    > root-b      | parents.top(): parsing | creates 'root'  , expands stack
+//    >    child1-b | parents.top(): root    | creates 'child1', expands stack
+//    >    child1-e | parents.top(): child1  | ends    'child1', shrinks stack
+//    >    child2-b | parents.top(): root    | creates 'child2', expands stack
+//    >    child2-e | parents.top(): child2  | ends    'child2', shrinks stack
+//    > root-e      | parents.top(): root    | ends    'root'  , shrinks stack
 //
 // Resulting tree:
-//    > root
-//    >    child1
-//    >    child2
+//    > parsing
+//    >    root
+//    >       child1
+//    >       child2
 //
 // While counting the time we also have to take into consideration that while most template instantiation is deferred
 // for later, clang can (and will) instantiate some templates early during parsing, their time should be subtracted.
+//
+// The easiest way to arrange it all is to merge parsing & instantiation events into a single chronologically
+// ordered array and iterate it, while keeping a manual track of the node stack. Recursion and non-merged handling
+// looks like a more efficient options, but it makes attributing instantiations to parsing nodes too difficult.
 
-using event_span = std::span<const cbp::trace::event>;
+cbp::tree build_parsing_subtree(std::vector<cbp::trace::event> parsing_events,
+                                std::vector<cbp::trace::event> instantiation_events) {
+    // Merge events & order them chronologically
+    std::vector<cbp::trace::event> events = std::move(parsing_events);
+    events.insert(events.end(), std::make_move_iterator(instantiation_events.begin()),
+                  std::make_move_iterator(instantiation_events.end()));
 
-void handle_parsing_event(event_span parsing_events, cbp::tree& parent, std::size_t& cursor, //
-                          event_span instantiation_events, std::size_t& instantiation_cursor //
-) {
-    // Include began
-    const auto& begin_event = parsing_events[cursor++];
+    std::stable_sort(events.begin(), events.end());
 
-    if (begin_event.type != "b") throw cbp::exception{"Incorrect trace schema, event type mismatch at pos {}", cursor};
-
-    auto current = cbp::tree{
-        .type = cbp::tree_type::parse,                     //
-        .name = begin_event.args.at("detail").get_string() //
-    };
-
-    // Handle transitive includes
-    if (cursor >= parsing_events.size()) throw cbp::exception{"Incorrect trace schema, source events end with begin."};
-
-    while (parsing_events[cursor].type == "b")
-        handle_parsing_event(parsing_events, current, cursor, instantiation_events, instantiation_cursor);
-
-    // Include ended
-    const auto& end_event = parsing_events[cursor++];
-
-    current.total = end_event.time - begin_event.time;
-
-    if (end_event.type != "e") throw cbp::exception{"Incorrect trace schema, event type mismatch at pos {}", cursor};
-
-    // Substract internal template instantiation time
-    cbp::microseconds last_instantiation_end = cbp::microseconds{};
-
-    while (instantiation_cursor < instantiation_events.size()) {
-        const auto& event = instantiation_events[instantiation_cursor];
-
-        const cbp::microseconds begin    = event.time;
-        const cbp::microseconds duration = event.duration.value(); // always present in valid schema
-        const cbp::microseconds end      = begin + duration;
-
-        const bool nested_in_parse_event = (begin_event.time <= begin) && (end <= end_event.time);
-
-        const bool nested_instantiation = end < last_instantiation_end;
-
-        if (!nested_in_parse_event) break;
-
-        ++instantiation_cursor;
-
-        if (!nested_instantiation) {      // this check prevents us from double-counting nested
-            last_instantiation_end = end; // instantiations we only care about the top-level timing
-            current.carry -= duration;
-        }
-    }
-
-    // Finalize
-    std::sort(current.children.begin(), current.children.end());
-
-    parent.children.push_back(std::move(current));
-}
-
-cbp::tree build_parsing_subtree(event_span parsing_events, event_span instantiation_events) {
     // Root node
     auto parsing_tree = cbp::tree{.type = cbp::tree_type::parsing, .name = "Parsing"};
 
-    // Create child nodes from events
-    for (std::size_t cursor = 0, instantiation_cursor = 0; cursor < parsing_events.size();)
-        handle_parsing_event(parsing_events, parsing_tree, cursor, instantiation_events, instantiation_cursor);
+    // Parse events while keeping a manual track of the node stack, the stack
+    // will always have at least 1 element due to the begin-end event maching
+    std::stack<cbp::tree*> parents;
+    parents.push(&parsing_tree);
 
-    std::sort(parsing_tree.children.begin(), parsing_tree.children.end());
+    cbp::microseconds last_instantiation_end = cbp::microseconds::min();
 
-    // Gather total duration for the root node
+    for (const auto& event : events) {
+        auto& current = parents.top();
+
+        // Parse event
+        if (event.name == "Source") {
+            // Include began
+            if (event.type == "b") {
+                current->children.push_back({
+                    .type  = cbp::tree_type::parse,                //
+                    .name  = event.args.at("detail").get_string(), //
+                    .total = -event.time                           //
+                });
+                parents.push(&current->children.back());
+            }
+            // Include ended
+            else {
+                current->total += event.time;
+                parents.pop();
+
+                if (parents.empty()) throw cbp::exception{"Incorrect trace schema: 'Source' event begin-end mismatch"};
+            }
+        }
+        // Instantiation events
+        else {
+            if (event.time < last_instantiation_end) continue; // nested instantiation, skip
+            if (parents.size() == 1) continue;                 // not during parsing, skip
+
+            const auto duration = event.duration.value();
+
+            current->carry -= duration; // always has a value in a correct schema
+            last_instantiation_end = event.time + duration;
+        }
+    }
+
+    // Gather root total
     for (const auto& child : parsing_tree.children) parsing_tree.total += child.total;
-    // TODO: How do we get a self-parsing time? Is that even possible?
 
     return parsing_tree;
 }
+
+using event_span = std::span<const cbp::trace::event>;
 
 // --- Instantiation subtree ---
 // -----------------------------
@@ -173,9 +167,6 @@ void handle_instantiation_event(event_span instantiation_events, cbp::tree& pare
 
     // Instantiation ended
 
-    // Finalize
-    std::sort(current.children.begin(), current.children.end());
-
     parent.children.push_back(std::move(current));
 }
 
@@ -186,8 +177,6 @@ cbp::tree build_instantiation_subtree(event_span instantiation_events) {
     // Create child nodes from events
     for (std::size_t cursor = 0; cursor < instantiation_events.size();)
         handle_instantiation_event(instantiation_events, instantiation_tree, cursor);
-
-    std::sort(instantiation_tree.children.begin(), instantiation_tree.children.end());
 
     // Gather total duration for the root node
     for (const auto& child : instantiation_tree.children) instantiation_tree.total += child.total;
@@ -211,6 +200,10 @@ cbp::microseconds carry_duration(cbp::tree& tree) {
     tree.carry += children_carry;
     tree.total += tree.carry;
     tree.self = tree.total - children_total;
+
+    // The children might've got reordered after a carry, which means now (or later) is the only
+    // correct time to perform sorting, compilations stage order however is to be preserved
+    if (tree.type != cbp::tree_type::translation_unit) std::stable_sort(tree.children.begin(), tree.children.end());
 
     // Propagate carry upwards in the recursion
     return std::exchange(tree.carry, cbp::microseconds{});

@@ -6,8 +6,7 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// Functions for analyzing builds/directories/files, which turn clang traces
-// into some kind of in-memory structure that we can work with.
+// Function that builds the main tree of profiling results from the trace.
 // _________________________________________________________________________________
 
 #pragma once

@@ -45,3 +45,6 @@
 # > Resources
 !resources/
 !resources/**
+# > Tests
+!tests/
+!tests/**

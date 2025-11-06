@@ -29,6 +29,8 @@ void normalize_pointer_spacing(std::string& identifier) {
     // Normalize "type *" / "type &" to "type*" / "type&"
     cbp::replace_all(identifier, " *", "*");
     cbp::replace_all(identifier, " &", "&");
+    
+    cbp::replace_all(identifier, "*const", "* const"); // for constructs like 'const char* const'
 }
 
 void normalize_comma_spacing(std::string& identifier) {
