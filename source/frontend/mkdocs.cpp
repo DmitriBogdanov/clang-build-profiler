@@ -61,10 +61,11 @@ void serialize(cbp::output::string_state& state, const cbp::tree& tree) {
 void cbp::output::mkdocs(const cbp::profile& profile, const std::filesystem::path& output_directory) try {
     // Ensure proper directory structure
     std::filesystem::remove_all(output_directory);
-    std::filesystem::create_directories(output_directory / "docs");
+    std::filesystem::create_directories(output_directory / "docs" / "images");
 
     // Copy MkDocs resources
     cbp::clone_from_embedded("resources/mkdocs/mkdocs.yml", output_directory / "mkdocs.yml");
+    cbp::clone_from_embedded("resources/mkdocs/docs/images/favicon.svg", output_directory / "docs/images/favicon.svg");
     cbp::clone_from_embedded("resources/mkdocs/docs/admonitions.css", output_directory / "docs/admonitions.css");
     cbp::clone_from_embedded("resources/mkdocs/docs/classes.css", output_directory / "docs/classes.css");
     cbp::clone_from_embedded("resources/mkdocs/docs/width.css", output_directory / "docs/width.css");
@@ -74,8 +75,7 @@ void cbp::output::mkdocs(const cbp::profile& profile, const std::filesystem::pat
     serialize(state, profile.tree);
 
     // Create files with results
-    std::ofstream(output_directory / "docs/index.md")
-        << fmt::format("<header>Profiling results</header>\n\n{}", state.str);
+    std::ofstream(output_directory / "docs/index.md") << fmt::format("# Profiling results\n\n{}", state.str);
 
 } catch (std::exception& e) {
     throw cbp::exception{"Could not output profile results as MkDocs, error:\n{}", e.what()};

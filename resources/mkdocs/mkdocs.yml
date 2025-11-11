@@ -37,10 +37,10 @@ plugins:
 theme:
   name: material
   
-  favicon: images/icon_site_logo.ico
+  favicon: images/favicon.svg
   
   icon:
-    logo: material/tools
+    logo: material/chart-donut-variant
     repo: fontawesome/brands/github
   
   # Color palette with a light/dark mode toggle

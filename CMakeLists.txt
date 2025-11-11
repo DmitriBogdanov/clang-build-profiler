@@ -16,6 +16,7 @@ cmrc_add_resource_library(
     NAMESPACE cbp
     "resources/html/report.html"
     "resources/mkdocs/mkdocs.yml"
+    "resources/mkdocs/docs/images/favicon.svg"
     "resources/mkdocs/docs/admonitions.css"
     "resources/mkdocs/docs/classes.css"
     "resources/mkdocs/docs/width.css"

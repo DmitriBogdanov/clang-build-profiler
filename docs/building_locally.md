@@ -8,7 +8,7 @@
 
 This project uses [CMake](https://cmake.org) with [presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html) as a main way of managing platform-dependent configuration.
 
-Since using the tool in question inherently requires an installation of `clang++`, the same compiler is used for all the build presets.
+Since using the tool in question inherently requires an installation of `clang++`, it is usually built with same compiler using `clang` preset. Other toolchains are also supported through `msvc` and `gcc` presets.
 
 On most systems LLVM provides both system packages and an [automatic install script](https://apt.llvm.org/):
 

@@ -7,7 +7,6 @@
 
 #include "backend/analyze.hpp"
 
-#include "external/fmt/chrono.h" // TEMP:
 #include <stack>
 
 #include "backend/trace.hpp"

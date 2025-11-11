@@ -16,29 +16,25 @@
 
 1. Build your project using `clang++` with `-ftime-trace` flag enabled
 
-2. Point the CLI tool at the [CMake]() build directory and select its desired output:
+2. Point the CLI tool at the [CMake](https://cmake.org/) build directory and select its desired output:
 
-```sh
-clang-build-profiler --build=build/ --output=mkdocs
-```
+<img src="images/showcase_mkdocs_invocation.png">
 
 3. Open the generated report:
 
-```sh
-(cd .cbp && mkdocs serve --open)
-```
-
-<img src="images/showcase_mkdocs.png">
+<img src="images/showcase_mkdocs_targets.png">
+<img src="images/showcase_mkdocs_target.png">
+<img src="images/showcase_mkdocs_translation_unit.png">
 
 4. Available output formats include:
 
-| `--output` | Description                                                  | Requirements                  |
-| ---------- | ------------------------------------------------------------ | ----------------------------- |
+| `--output` | Description                                                                                                                               | Requirements                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
 | `mkdocs`   | Nicest output for viewing, it uses [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) to serve an interactive GUI in browser | `pip install mkdocs-material` |
-| `html`     | Stand-alone HTML report, not as fancy, but doesn't require MkDocs | None                          |
-| `terminal` | Colored in-terminal output, useful for small projects or with high level of pruning | None                          |
-| `json`     | JSON dump of profiling data, useful for custom analysis pipelines | None                          |
-| `text`     | Text file output, useful for saving human-readable build artifacts with profiling data | None                          |
+| `html`     | Stand-alone HTML report, not as fancy, but doesn't require MkDocs                                                                         | None                          |
+| `terminal` | Colored in-terminal output, useful for small projects or with high level of pruning                                                       | None                          |
+| `json`     | JSON dump of profiling data, useful for custom analysis pipelines                                                                         | None                          |
+| `text`     | Text file output, useful for saving human-readable build artifacts with profiling data                                                    | None                          |
 
 ## Features
 
@@ -50,7 +46,7 @@ clang-build-profiler --build=build/ --output=mkdocs
 
 ## Documentation
 
-The [project website]() serves as its main form of documentation.
+The [project website](https://dmitribogdanov.github.io/clang-build-profiler/) serves as its main form of documentation.
 
 The docs can also be viewed directly from GitHub:
 

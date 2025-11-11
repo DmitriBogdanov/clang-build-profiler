@@ -26,40 +26,41 @@ The config contains project-specific settings such as coloring, name simplificat
 Below in a default config used by the program:
 
 ```yaml title="clang-build-profiler"
----
 version: "0.1.0"
 
 # The main profiling output
 tree:
-  # How to color the tree nodes
+
+  # Node color & pruning thresholds, for example:
+  #   'gray  :  90' => color durations >  90 ms gray
+  #   'white : 150' => color durations > 150 ms white
+  #   'yellow: 300' => color durations > 300 ms yellow
+  #   'red   : 800' => color durations > 800 ms red
+  #   Nodes without a color are hidden, to disable all pruning set 'gray' to '0'
   categorize:
-    gray  :  90 # duration >  50 ms => color gray
-    white : 150 # duration > 100 ms => color white
-    yellow: 300 # duration > 150 ms => color yellow
-    red   : 800 # duration > 300 ms => color red
-    
-    # Note: nodes without a color are hidden, to disable all pruning set 'gray' to '0'
+    gray  :  90
+    white : 150
+    yellow: 300
+    red   : 800
   
-  # Regex replacement rules to reduce filename verbosity
-  replace_prefix:
-    - from: "/usr/lib/llvm-21/include/c++/v1/"
-      to  : "std/"
-    - from: "/home/georgehaldane/Documents/PROJECTS/CPP/clang-build-profiler/proj/"
+  # Automatically detect & simplify standard header includes, for example:
+  #   'false' => '/usr/lib/llvm-21/include/c++/v1/filesystem'
+  #   'true'  => '<filesystem>'
+  detect_standard_headers: true
+
+  # Automatically detect & simplify project header includes, for example:
+  #   'false' => '/home/.../clang-build-profiler/include/utility/replace.hpp'
+  #   'true'  => 'include/utility/replace.hpp'
+  detect_project_headers:  true
+  
+  # Create alias for some filepaths, for example:
+  #   '- from: "include/external/boost/"' => includes paths beginning with "include/external/boost/"
+  #   '  to  : "boost/"                 '    will be shortened to "boost/"
+  replace_filepath:
+    - from: "include/"
       to  : ""
-
-# Summary of header files that took the longest time in total to parse
-parsing_summary:
-  enabled : true
-  quantity: 100
-
-# Summary of templates that took the longest time in total to instantiate
-instantiation_summary:
-  enabled : true
-  quantity: 100
-
-# Details about the tool invocation - time, config and etc.
-environment:
-  enabled: true
+    - from: "source/"
+      to  : ""
 ```
 
 To serialize this config for modification we can run:

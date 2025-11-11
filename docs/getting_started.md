@@ -40,18 +40,26 @@ To analyze an entire CMake build run:
 clang-build-profiler --build=<path_to_cmake_build>
 ```
 
-Output example:
-
-
-
 > [!Tip]
 > When invoked with no arguments, `clang-build-profiler` assumes `--build=build/` by default.
 
+Output example:
+
+<img src="images/showcase_terminal_invocation.png">
+
+Using `--output=html` we can generate a stand-alone HTML report with collapsable sections:
+
+<img src="images/showcase_html_invocation.png">
+
+Generated report can be opened in any browser:
+
+<img src="images/showcase_html.png">
+
 ### Making the output pretty
 
-Analyzing a large build directly in the terminal is rather impractical. Using `mkdocs` we can build a proper GUI with expandable sections.
+Using `mkdocs` we can generate even prettier reports with proper GUI.
 
-`mkdocs` can be easily installed with `pip`:
+`mkdocs` can be installed with `pip`:
 
 ```sh
 pip install mkdocs-material
@@ -71,7 +79,9 @@ And visualize it in the browser using `mkdocs`:
 
 Output example:
 
-<img src="images/showcase_mkdocs.png">
+<img src="images/showcase_mkdocs_targets.png">
+<img src="images/showcase_mkdocs_target.png">
+<img src="images/showcase_mkdocs_translation_unit.png">
 
 > [!Tip]
 > `pip` together with `python3` can be installed using `apt` or grabbed directly from the [official website](https://www.python.org/downloads/):
