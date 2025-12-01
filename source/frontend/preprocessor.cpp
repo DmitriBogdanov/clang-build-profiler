@@ -126,8 +126,9 @@ void prettify_root(cbp::tree& root, const cbp::config& config) {
 }
 
 void cbp::preprocess(cbp::profile& profile, std::string_view working_directory) try {
-
     prettify_tree(profile.tree, profile.config, working_directory);
+    prettify_tree(profile.summary.parsing, profile.config, working_directory);
+    prettify_tree(profile.summary.instantiation, profile.config, working_directory);
     prettify_root(profile.tree, profile.config);
 
 } catch (std::exception& e) { throw cbp::exception{"Could not preprocess profiling tree, error:\n{}", e.what()}; }

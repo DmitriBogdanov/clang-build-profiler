@@ -16,6 +16,7 @@
 
 #include "backend/config.hpp"
 #include "backend/invoke.hpp"
+#include "backend/merge.hpp"
 #include "frontend/html.hpp"
 #include "frontend/json.hpp"
 #include "frontend/mkdocs.hpp"
@@ -190,6 +191,17 @@ int main(int argc, char* argv[]) try {
         profile.tree = cbp::analyze_build(path);
     }
 
+    // Build summaries
+    profile.summary                    = cbp::create_merge_summary(profile.tree);
+    profile.summary.parsing.name       = "Parsing";
+    profile.summary.parsing.type       = cbp::tree_type::parsing;
+    profile.summary.instantiation.name = "Template instantiation";
+    profile.summary.instantiation.type = cbp::tree_type::instantiation;
+    // Profiling results
+    // Compilation summary
+    // Heaviest includes
+    
+    
     // Prettify the results
     fmt::print(style_step, "Step 4/5: ");
     fmt::println("Preprocessing results...");

@@ -6,23 +6,21 @@
 //
 // ____________________________________ CONTENT ____________________________________
 //
-// A struct representing a total of all profiling results.
+// Function that builds a merged tree summary for analyzing shared impact of
+// headers / templates on all translation units.
 // _________________________________________________________________________________
 
 #pragma once
 
-#include "backend/config.hpp"
-#include "backend/merge.hpp"
 #include "backend/tree.hpp"
-
 
 namespace cbp {
 
-struct profile {
-    cbp::tree   tree;
-    cbp::config config;
-
-    cbp::merge_summary summary;
+struct merge_summary {
+    cbp::tree parsing;
+    cbp::tree instantiation;
 };
+
+cbp::merge_summary create_merge_summary(const cbp::tree& tree);
 
 } // namespace cbp

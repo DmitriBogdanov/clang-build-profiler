@@ -40,6 +40,7 @@ target_sources(
     "source/backend/analyze.cpp"
     "source/backend/config.cpp"
     "source/backend/invoke.cpp"
+    "source/backend/merge.cpp"
     "source/frontend/html.cpp"
     "source/frontend/json.cpp"
     "source/frontend/mkdocs.cpp"

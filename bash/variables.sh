@@ -12,7 +12,7 @@
 # ---- Constants ----
 # ===================
 
-path_executable="build/clang-report"
+path_executable="build/clang-build-profiler"
 
 directory_build="build/"
 
