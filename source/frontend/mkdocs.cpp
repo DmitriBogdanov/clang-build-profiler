@@ -71,11 +71,17 @@ void cbp::output::mkdocs(const cbp::profile& profile, const std::filesystem::pat
     cbp::clone_from_embedded("resources/mkdocs/docs/width.css", output_directory / "docs/width.css");
 
     // Serialize results to a string
-    cbp::output::string_state state{profile};
-    serialize(state, profile.tree);
+    cbp::output::string_state tree_state{profile};
+    serialize(tree_state, profile.tree);
+
+    cbp::output::string_state summary_state{profile};
+    serialize(summary_state, profile.summary.stages);
 
     // Create files with results
-    std::ofstream(output_directory / "docs/index.md") << fmt::format("# Profiling results\n\n{}", state.str);
+    std::ofstream(output_directory / "docs/index.md") << "# Profiling results\n\n"
+                                                      << tree_state.str << "\n\n"
+                                                      << "# Compilation summary\n\n"
+                                                      << summary_state.str;
 
 } catch (std::exception& e) {
     throw cbp::exception{"Could not output profile results as MkDocs, error:\n{}", e.what()};

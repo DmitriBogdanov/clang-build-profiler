@@ -79,14 +79,11 @@ void cbp::output::html(const cbp::profile& profile, const std::filesystem::path&
     cbp::clone_from_embedded("resources/html/report.html", output_directory / "report.html");
 
     // Serialize results to a string
-    cbp::output::string_state state{profile};
-    serialize(state, profile.tree);
+    cbp::output::string_state tree_state{profile};
+    serialize(tree_state, profile.tree);
 
-    cbp::output::string_state parsing_summary_state{profile};
-    serialize(parsing_summary_state, profile.summary.parsing);
-
-    cbp::output::string_state instantiation_summary_state{profile};
-    serialize(instantiation_summary_state, profile.summary.instantiation);
+    cbp::output::string_state summary_state{profile};
+    serialize(summary_state, profile.summary.stages);
 
     // Create files with results
     constexpr auto tree_header = "\n"
@@ -97,25 +94,16 @@ void cbp::output::html(const cbp::profile& profile, const std::filesystem::path&
                                  "<header>Profiling results</header>\n"
                                  "\n";
 
-    constexpr auto parsing_summary_header = "\n"
-                                            "<!-- --------------- -->\n"
-                                            "<!-- Parsing summary -->\n"
-                                            "<!-- --------------- -->\n"
-                                            "\n"
-                                            "<header>Parsing summary</header>\n"
-                                            "\n";
+    constexpr auto summary_header = "\n"
+                                    "<!-- ------------------- -->\n"
+                                    "<!-- Compilation summary -->\n"
+                                    "<!-- ------------------- -->\n"
+                                    "\n"
+                                    "<header>Compilation summary</header>\n";
 
-    constexpr auto instantiation_summary_header = "\n"
-                                                  "<!-- --------------------- -->\n"
-                                                  "<!-- Instantiation summary -->\n"
-                                                  "<!-- --------------------- -->\n"
-                                                  "\n"
-                                                  "<header>Instantiation summary</header>\n"
-                                                  "\n";
 
-    std::ofstream(output_directory / "report.html", std::ios::app)          //
-        << tree_header << state.str                                         //
-        << parsing_summary_header << parsing_summary_state.str              //
-        << instantiation_summary_header << instantiation_summary_state.str; //
+    std::ofstream(output_directory / "report.html", std::ios::app) //
+        << tree_header << tree_state.str                           //
+        << summary_header << summary_state.str;                    //
 
 } catch (std::exception& e) { throw cbp::exception{"Could not output profile results as HTML, error:\n{}", e.what()}; }

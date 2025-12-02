@@ -17,8 +17,7 @@
 namespace cbp {
 
 struct merge_summary {
-    cbp::tree parsing;
-    cbp::tree instantiation;
+    cbp::tree stages;
 };
 
 cbp::merge_summary create_merge_summary(const cbp::tree& tree);
