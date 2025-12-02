@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://dmitribogdanov.github.io/clang-build-profiler/index.html</loc>
+         <lastmod>2025-12-02</lastmod>
+    </url>
+    <url>
+         <loc>https://dmitribogdanov.github.io/clang-build-profiler/LICENSE.html</loc>
+         <lastmod>2025-12-02</lastmod>
+    </url>
+    <url>
+         <loc>https://dmitribogdanov.github.io/clang-build-profiler/building_locally.html</loc>
+         <lastmod>2025-12-02</lastmod>
+    </url>
+    <url>
+         <loc>https://dmitribogdanov.github.io/clang-build-profiler/cli_arguments.html</loc>
+         <lastmod>2025-12-02</lastmod>
+    </url>
+    <url>
+         <loc>https://dmitribogdanov.github.io/clang-build-profiler/configuration_file.html</loc>
+         <lastmod>2025-12-02</lastmod>
+    </url>
+    <url>
+         <loc>https://dmitribogdanov.github.io/clang-build-profiler/getting_started.html</loc>
+         <lastmod>2025-12-02</lastmod>
+    </url>
+    <url>
+         <loc>https://dmitribogdanov.github.io/clang-build-profiler/technical_limitations.html</loc>
+         <lastmod>2025-12-02</lastmod>
+    </url>
+</urlset>
